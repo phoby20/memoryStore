@@ -1,0 +1,229 @@
+/* Memory Store - 베이지/세피아 + 신경망 디자인 시스템 */
+
+:root {
+  /* Paper / Ink palette */
+  --paper-0: #FBF6EC;
+  --paper-1: #F5EDE0;
+  --paper-2: #EEE3D0;
+  --paper-3: #E5D6BC;
+  --paper-line: #D9C7A8;
+
+  --ink-1: #2A1F18;
+  --ink-2: #3A2E26;
+  --ink-3: #5C4A3D;
+  --ink-4: #8B7560;
+  --ink-5: #B5A289;
+
+  /* Sepia accents */
+  --sepia: #8B6F47;
+  --sepia-deep: #6B5235;
+  --sepia-soft: #C2A57F;
+
+  /* Neural glow (warm copper, like aged ink under candlelight) */
+  --glow: #C97B4A;
+  --glow-soft: #E8A87C;
+  --glow-deep: #9C5A30;
+
+  /* Functional */
+  --success: #6B8E5A;
+  --warn: #C9943C;
+  --danger: #B14B3E;
+
+  /* Type */
+  --font-serif: "Noto Serif KR", "Source Serif Pro", Georgia, serif;
+  --font-sans: "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+
+  /* Spacing */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 14px;
+
+  --shadow-1: 0 1px 2px rgba(58, 46, 38, 0.06), 0 2px 8px rgba(58, 46, 38, 0.04);
+  --shadow-2: 0 2px 4px rgba(58, 46, 38, 0.08), 0 8px 24px rgba(58, 46, 38, 0.06);
+  --shadow-3: 0 4px 8px rgba(58, 46, 38, 0.10), 0 16px 48px rgba(58, 46, 38, 0.10);
+}
+
+[data-theme="dark"] {
+  --paper-0: #1B1611;
+  --paper-1: #221C16;
+  --paper-2: #2B241D;
+  --paper-3: #362D24;
+  --paper-line: #463A2E;
+
+  --ink-1: #F5EDE0;
+  --ink-2: #E8DCC8;
+  --ink-3: #C2AE92;
+  --ink-4: #8E7B62;
+  --ink-5: #5E5042;
+
+  --sepia: #C2A57F;
+  --sepia-deep: #E8C99B;
+  --sepia-soft: #6B5235;
+
+  --glow: #E8A87C;
+  --glow-soft: #F4C9A2;
+  --glow-deep: #C97B4A;
+}
+
+/* Paper texture — subtle noise */
+.paper {
+  background-color: var(--paper-1);
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(139, 111, 71, 0.04) 0, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(139, 111, 71, 0.03) 0, transparent 40%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.36, 0 0 0 0 0.29, 0 0 0 0 0.23, 0 0 0 0.025 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+[data-theme="dark"] .paper {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(232, 168, 124, 0.04) 0, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(232, 168, 124, 0.03) 0, transparent 40%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.91, 0 0 0 0 0.86, 0 0 0 0 0.78, 0 0 0 0.02 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--ink-2);
+  -webkit-font-smoothing: antialiased;
+  background: var(--paper-1);
+}
+
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; }
+
+/* Hand-drawn divider */
+.hand-rule {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--paper-line) 8%,
+    var(--paper-line) 92%,
+    transparent 100%);
+  border: none;
+  margin: 0;
+}
+
+/* Typography helpers */
+.serif { font-family: var(--font-serif); }
+.mono { font-family: var(--font-mono); }
+.italic { font-style: italic; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--ink-2);
+  background: var(--ink-2);
+  color: var(--paper-0);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--ink-1); border-color: var(--ink-1); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-2);
+  border: 1px solid var(--paper-line);
+}
+.btn-ghost:hover {
+  background: var(--paper-2);
+  border-color: var(--ink-4);
+}
+
+.btn-glow {
+  background: var(--glow);
+  border-color: var(--glow);
+  color: var(--paper-0);
+}
+.btn-glow:hover {
+  background: var(--glow-deep);
+  border-color: var(--glow-deep);
+}
+
+/* Cards */
+.card {
+  background: var(--paper-0);
+  border: 1px solid var(--paper-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+}
+
+/* Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--paper-2);
+  color: var(--ink-3);
+  border: 1px solid var(--paper-line);
+}
+
+.chip-glow {
+  background: rgba(201, 123, 74, 0.1);
+  color: var(--glow-deep);
+  border-color: rgba(201, 123, 74, 0.25);
+}
+
+[data-theme="dark"] .chip-glow {
+  background: rgba(232, 168, 124, 0.12);
+  color: var(--glow-soft);
+  border-color: rgba(232, 168, 124, 0.3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--paper-line);
+  border-radius: 999px;
+  border: 2px solid var(--paper-1);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--ink-5); }
+
+/* Subtle pulse animation for live nodes */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@keyframes draw-line {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Logo mark */
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--ink-1);
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.logo-mark .dot {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}

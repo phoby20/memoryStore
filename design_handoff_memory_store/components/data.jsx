@@ -1,0 +1,106 @@
+// Sample data for Memory Store
+
+const SAMPLE_MEMORIES = [
+  {
+    id: 'm1',
+    text: '오랫동안 비건 식단을 유지하고 있으며, 특히 콩 단백질 알레르기가 있어서 두부 대신 템페를 선호한다.',
+    category: '식습관',
+    categoryColor: '#6B8E5A',
+    source: 'Aria',
+    date: '2026.04.28',
+    tags: ['비건', '알레르기', '음식'],
+    linked: 7,
+  },
+  {
+    id: 'm2',
+    text: '서울 마포구에 거주 중. 출퇴근은 자전거를 주로 이용하고, 주말마다 한강을 따라 라이딩하는 것을 즐긴다.',
+    category: '생활',
+    categoryColor: '#C97B4A',
+    source: 'Nova',
+    date: '2026.04.21',
+    tags: ['거주지', '취미', '운동'],
+    linked: 4,
+  },
+  {
+    id: 'm3',
+    text: '백엔드 개발자로 7년차. 주로 Go와 Rust를 사용하며, 최근에는 분산 시스템과 데이터베이스 내부 구조에 깊은 흥미를 느끼고 있다.',
+    category: '직업',
+    categoryColor: '#8B6F47',
+    source: 'Sage',
+    date: '2026.04.15',
+    tags: ['개발', 'Go', 'Rust', '관심사'],
+    linked: 12,
+  },
+  {
+    id: 'm4',
+    text: '하루키의 단편을 좋아한다. 특히 「반딧불이」와 「치즈 케이크 모양의 나의 가난」을 자주 다시 읽는다.',
+    category: '독서',
+    categoryColor: '#9C5A30',
+    source: 'Aria',
+    date: '2026.04.10',
+    tags: ['문학', '하루키', '에세이'],
+    linked: 5,
+  },
+  {
+    id: 'm5',
+    text: '아침에는 진하게 내린 에티오피아 예가체프를, 오후에는 따뜻한 호지차를 마신다. 카페인은 오후 3시 이후로 피한다.',
+    category: '식습관',
+    categoryColor: '#6B8E5A',
+    source: 'Lumen',
+    date: '2026.04.05',
+    tags: ['커피', '루틴'],
+    linked: 3,
+  },
+  {
+    id: 'm6',
+    text: '딸 서연(7세)이 곧 초등학교에 입학한다. 학교 적응과 친구 관계에 대해 자주 고민이 많다.',
+    category: '가족',
+    categoryColor: '#B14B3E',
+    source: 'Aria',
+    date: '2026.03.30',
+    tags: ['가족', '육아', '딸'],
+    linked: 9,
+  },
+  {
+    id: 'm7',
+    text: 'INFP 성향. 큰 모임보다 1:1 대화를 선호하고, 새로운 환경에서는 적응하는 데 시간이 걸리는 편이다.',
+    category: '성향',
+    categoryColor: '#C9943C',
+    source: 'Sage',
+    date: '2026.03.22',
+    tags: ['MBTI', '성격'],
+    linked: 8,
+  },
+  {
+    id: 'm8',
+    text: '여행 갈 때 짐을 최소화하는 것을 선호한다. 35L 백팩 하나로 2주는 다닐 수 있는 미니멀리스트.',
+    category: '생활',
+    categoryColor: '#C97B4A',
+    source: 'Nova',
+    date: '2026.03.18',
+    tags: ['여행', '미니멀리즘'],
+    linked: 4,
+  },
+];
+
+const CATEGORIES = [
+  { name: '식습관', color: '#6B8E5A', count: 14 },
+  { name: '직업', color: '#8B6F47', count: 23 },
+  { name: '가족', color: '#B14B3E', count: 11 },
+  { name: '생활', color: '#C97B4A', count: 18 },
+  { name: '독서', color: '#9C5A30', count: 9 },
+  { name: '성향', color: '#C9943C', count: 7 },
+  { name: '관심사', color: '#5C7E6A', count: 16 },
+  { name: '건강', color: '#A87C5A', count: 6 },
+];
+
+const AI_SERVICES = [
+  { name: 'Aria', desc: '대화형 어시스턴트', status: 'connected', glyph: '✦', lastSync: '12분 전', collected: 47 },
+  { name: 'Nova', desc: '검색 & 리서치', status: 'connected', glyph: '◇', lastSync: '1시간 전', collected: 23 },
+  { name: 'Sage', desc: '코드 & 기술 자문', status: 'connected', glyph: '◈', lastSync: '3시간 전', collected: 31 },
+  { name: 'Lumen', desc: '창작 도우미', status: 'connected', glyph: '○', lastSync: '어제', collected: 12 },
+  { name: 'Echo', desc: '음성 비서', status: 'pending', glyph: '△', lastSync: '—', collected: 0 },
+  { name: 'Pith', desc: '요약 & 메모', status: 'available', glyph: '◊', lastSync: '—', collected: 0 },
+];
+
+Object.assign(window, { SAMPLE_MEMORIES, CATEGORIES, AI_SERVICES });
