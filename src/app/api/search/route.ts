@@ -20,9 +20,9 @@ export async function GET(req: NextRequest) {
       where: {
         userId,
         OR: [
-          { key: { contains: q } },
-          { value: { contains: q } },
-          { category: { contains: q } },
+          { key: { contains: q, mode: "insensitive" } },
+          { value: { contains: q, mode: "insensitive" } },
+          { category: { contains: q, mode: "insensitive" } },
         ],
       },
       orderBy: { updatedAt: "desc" },
