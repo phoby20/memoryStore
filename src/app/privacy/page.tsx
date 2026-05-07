@@ -9,19 +9,20 @@ const CONTACT_EMAIL = "privacy@memorystore.app";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen" style={{ background: "#0f0f13" }}>
-      <header className="px-6 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-        <div className="max-w-3xl mx-auto flex items-center gap-3">
-          <Link href="/" className="text-2xl">🧠</Link>
-          <span className="text-white font-medium">Memory Store</span>
+    <div style={{ minHeight: "100vh", background: "var(--paper-1)" }}>
+      <header style={{ padding: "20px 32px", borderBottom: "1px solid var(--paper-line)", background: "var(--paper-0)" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontFamily: "var(--font-serif)", fontWeight: 600, color: "var(--ink-1)", fontSize: 16 }}>Memory Store</span>
+          </Link>
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold text-white mb-2">개인정보 처리방침</h1>
-        <p className="text-gray-500 text-sm mb-10">시행일: {EFFECTIVE_DATE}</p>
+      <div style={{ maxWidth: 760, margin: "0 auto", padding: "48px 32px" }}>
+        <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 8px" }}>개인정보 처리방침</h1>
+        <p style={{ fontSize: 13, color: "var(--ink-4)", margin: "0 0 40px", fontFamily: "var(--font-mono)" }}>시행일: {EFFECTIVE_DATE}</p>
 
-        <div className="space-y-10 text-gray-300 leading-relaxed">
+        <div style={{ display: "flex", flexDirection: "column", gap: 32, color: "var(--ink-3)", lineHeight: 1.7 }}>
 
           <Section title="1. 개요">
             <p>
@@ -40,14 +41,14 @@ export default function PrivacyPage() {
                 ["민감 정보", "건강 정보, 재무 정보 (입력한 경우)", "직접 입력", "서비스 DB"],
               ]}
             />
-            <p className="mt-3 text-sm text-yellow-400/80">
-              ⚠️ 건강 및 재무 카테고리의 정보는 민감한 개인정보에 해당합니다.
+            <p style={{ fontSize: 12, color: "var(--warn)", marginTop: 10 }}>
+              ⚠ 건강 및 재무 카테고리의 정보는 민감한 개인정보에 해당합니다.
               해당 정보는 사용자가 직접 선택하여 입력한 경우에만 저장됩니다.
             </p>
           </Section>
 
           <Section title="3. 개인정보 이용 목적">
-            <ul className="list-disc pl-5 space-y-1">
+            <ul style={{ paddingLeft: 20, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
               <li>AI 비서에게 사용자 맥락을 제공하는 메모리 서비스 운영</li>
               <li>회원 식별 및 서비스 접근 인증</li>
               <li>서비스 개선 및 오류 처리</li>
@@ -64,7 +65,7 @@ export default function PrivacyPage() {
                 ["서비스 로그", "최대 30일", "자동 삭제"],
               ]}
             />
-            <p className="mt-3 text-sm text-gray-400">
+            <p style={{ fontSize: 12, color: "var(--ink-4)", marginTop: 10 }}>
               회원 탈퇴 시 서비스에 저장된 모든 메모리 데이터와 API 키는
               즉시 삭제되며 복구할 수 없습니다.
             </p>
@@ -77,22 +78,22 @@ export default function PrivacyPage() {
                 ["Clerk, Inc.", "회원 인증 및 계정 관리 (Google OAuth)", "회원 탈퇴 시"],
               ]}
             />
-            <p className="mt-3 text-sm text-gray-400">
+            <p style={{ fontSize: 12, color: "var(--ink-4)", marginTop: 10 }}>
               위 경우 외에는 사전 동의 없이 개인정보를 제3자에게 제공하지 않습니다.
             </p>
           </Section>
 
           <Section title="6. 사용자의 권리">
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong className="text-white">열람권</strong> — 저장된 메모리는 대시보드에서 언제든 확인 가능</li>
-              <li><strong className="text-white">수정권</strong> — 대시보드에서 직접 수정 가능</li>
-              <li><strong className="text-white">삭제권</strong> — 개별 삭제 또는 회원 탈퇴로 전체 삭제</li>
-              <li><strong className="text-white">이의제기권</strong> — 아래 연락처로 문의</li>
+            <ul style={{ paddingLeft: 20, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+              <li><strong style={{ color: "var(--ink-1)" }}>열람권</strong> — 저장된 메모리는 대시보드에서 언제든 확인 가능</li>
+              <li><strong style={{ color: "var(--ink-1)" }}>수정권</strong> — 대시보드에서 직접 수정 가능</li>
+              <li><strong style={{ color: "var(--ink-1)" }}>삭제권</strong> — 개별 삭제 또는 회원 탈퇴로 전체 삭제</li>
+              <li><strong style={{ color: "var(--ink-1)" }}>이의제기권</strong> — 아래 연락처로 문의</li>
             </ul>
           </Section>
 
           <Section title="7. 개인정보 보호를 위한 기술적 조치">
-            <ul className="list-disc pl-5 space-y-1">
+            <ul style={{ paddingLeft: 20, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
               <li>HTTPS 암호화 통신 적용</li>
               <li>API 키 기반 접근 제어</li>
               <li>Clerk OAuth를 통한 안전한 인증 (비밀번호 직접 저장 없음)</li>
@@ -126,8 +127,8 @@ export default function PrivacyPage() {
 
         </div>
 
-        <div className="mt-16 pt-8" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-          <Link href="/" className="text-purple-400 hover:text-purple-300 text-sm transition-colors">
+        <div style={{ marginTop: 48, paddingTop: 24, borderTop: "1px solid var(--paper-line)" }}>
+          <Link href="/" style={{ fontSize: 13, color: "var(--glow-deep)", textDecoration: "none", fontWeight: 500 }}>
             ← 홈으로 돌아가기
           </Link>
         </div>
@@ -139,7 +140,7 @@ export default function PrivacyPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-lg font-semibold text-white mb-3">{title}</h2>
+      <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 17, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 12px" }}>{title}</h2>
       {children}
     </section>
   );
@@ -147,12 +148,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
-    <div className="overflow-x-auto rounded-xl" style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
-      <table className="w-full text-sm">
+    <div style={{ overflowX: "auto", borderRadius: 8, border: "1px solid var(--paper-line)" }}>
+      <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
         <thead>
-          <tr style={{ background: "rgba(255,255,255,0.05)" }}>
+          <tr style={{ background: "var(--paper-2)" }}>
             {headers.map((h) => (
-              <th key={h} className="px-4 py-3 text-left text-gray-300 font-medium whitespace-nowrap">
+              <th key={h} style={{ padding: "10px 14px", textAlign: "left", color: "var(--ink-2)", fontWeight: 600, whiteSpace: "nowrap", fontSize: 12 }}>
                 {h}
               </th>
             ))}
@@ -160,9 +161,9 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            <tr key={i} style={{ borderTop: "1px solid var(--paper-line)" }}>
               {row.map((cell, j) => (
-                <td key={j} className="px-4 py-3 text-gray-400 text-xs">
+                <td key={j} style={{ padding: "10px 14px", color: "var(--ink-3)", fontSize: 12 }}>
                   {cell}
                 </td>
               ))}
