@@ -32,7 +32,16 @@ export async function resolveUserId(req: NextRequest): Promise<string | null> {
 
 export function generateApiKey(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return "mem_" + Array.from(array, (b) => chars[b % chars.length]).join("");
+  // rejection sampling으로 modulo bias 제거
+  const limit = 256 - (256 % chars.length); // 248
+  const result: string[] = [];
+  while (result.length < 32) {
+    const bytes = new Uint8Array(64);
+    crypto.getRandomValues(bytes);
+    for (const b of bytes) {
+      if (result.length >= 32) break;
+      if (b < limit) result.push(chars[b % chars.length]);
+    }
+  }
+  return "mem_" + result.join("");
 }

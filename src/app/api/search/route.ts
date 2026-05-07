@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       take: 20,
     });
 
-    return NextResponse.json({ memories, query: q });
+    return NextResponse.json({ memories });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

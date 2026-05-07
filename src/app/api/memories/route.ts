@@ -5,6 +5,8 @@ import { resolveUserId } from "@/lib/auth";
 const CATEGORY_MAX = 20;
 const KEY_MAX = 100;
 const VALUE_MAX = 1000;
+const MAX_MEMORIES_PER_USER = 1000;
+const GET_LIMIT = 500;
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,6 +19,7 @@ export async function GET(req: NextRequest) {
     const memories = await prisma.memory.findMany({
       where: { userId, ...(category ? { category } : {}) },
       orderBy: { updatedAt: "desc" },
+      take: GET_LIMIT,
     });
 
     return NextResponse.json({ memories });
@@ -43,6 +46,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         error: `category max ${CATEGORY_MAX}, key max ${KEY_MAX}, value max ${VALUE_MAX} characters`,
       }, { status: 400 });
+    }
+
+    const memoryCount = await prisma.memory.count({ where: { userId } });
+    if (memoryCount >= MAX_MEMORIES_PER_USER) {
+      return NextResponse.json({ error: `메모리는 최대 ${MAX_MEMORIES_PER_USER}개까지 저장할 수 있습니다.` }, { status: 400 });
     }
 
     const existing = await prisma.memory.findFirst({ where: { userId, category, key } });

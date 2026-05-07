@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { resolveUserId, generateApiKey } from "@/lib/auth";
 
 const NAME_MAX_LEN = 50;
+const MAX_KEYS_PER_USER = 10;
 
 export async function GET(req: NextRequest) {
   try {
@@ -41,6 +42,11 @@ export async function POST(req: NextRequest) {
     }
     if (name.trim().length === 0 || name.length > NAME_MAX_LEN) {
       return NextResponse.json({ error: `name must be 1–${NAME_MAX_LEN} characters` }, { status: 400 });
+    }
+
+    const keyCount = await prisma.apiKey.count({ where: { userId } });
+    if (keyCount >= MAX_KEYS_PER_USER) {
+      return NextResponse.json({ error: `API 키는 최대 ${MAX_KEYS_PER_USER}개까지 발급할 수 있습니다.` }, { status: 400 });
     }
 
     const key = generateApiKey();

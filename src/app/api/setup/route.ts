@@ -8,15 +8,12 @@ export async function POST() {
     const userId = await getClerkUserId();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const existingKeys = await prisma.apiKey.findMany({
-      where: { userId },
-      select: { key: true, name: true },
-    });
+    const existingKeyCount = await prisma.apiKey.count({ where: { userId } });
 
-    if (existingKeys.length > 0) {
+    if (existingKeyCount > 0) {
+      // 기존 키 원문 재노출 금지 — 설정 페이지에서 새로 발급하도록 안내
       return NextResponse.json({
-        apiKey: existingKeys[0].key,
-        message: "기존 API 키를 반환합니다.",
+        message: "이미 초기화되어 있습니다. API 키는 설정 페이지에서 발급하세요.",
         alreadyInitialized: true,
       });
     }
