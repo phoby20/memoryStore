@@ -38,6 +38,7 @@ export default function DashboardPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [activeCategory, setActiveCategory] = useState("전체");
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchMemories = useCallback(async (q?: string) => {
     setLoading(true);
@@ -61,15 +62,20 @@ export default function DashboardPage() {
   }, [search, fetchMemories]);
 
   async function handleAdd() {
-    if (!form.key.trim() || !form.value.trim()) return;
-    await fetch("/api/memories", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setForm({ category: "취향", key: "", value: "" });
-    setShowAdd(false);
-    fetchMemories(search || undefined);
+    if (!form.key.trim() || !form.value.trim() || submitting) return;
+    setSubmitting(true);
+    try {
+      await fetch("/api/memories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      setForm({ category: "취향", key: "", value: "" });
+      setShowAdd(false);
+      fetchMemories(search || undefined);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   async function handleDelete(id: string) {
@@ -239,7 +245,7 @@ export default function DashboardPage() {
             </div>
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
               <button onClick={() => setShowAdd(false)} style={{ padding: "8px 16px", background: "transparent", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", cursor: "pointer" }}>취소</button>
-              <button onClick={handleAdd} style={{ padding: "8px 18px", background: "var(--glow)", border: "1px solid var(--glow)", borderRadius: 6, fontSize: 13, color: "var(--paper-0)", fontWeight: 500, cursor: "pointer" }}>저장</button>
+              <button onClick={handleAdd} disabled={submitting} style={{ padding: "8px 18px", background: "var(--glow)", border: "1px solid var(--glow)", borderRadius: 6, fontSize: 13, color: "var(--paper-0)", fontWeight: 500, cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.6 : 1 }}>{submitting ? "저장 중…" : "저장"}</button>
             </div>
           </div>
         )}
