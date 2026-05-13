@@ -61,7 +61,7 @@ export default async function HomePage() {
       </header>
 
       {/* Hero */}
-      <section style={{
+      <section className="hero-section" style={{
         position: "relative",
         padding: "80px 48px 100px",
         display: "grid",
@@ -157,7 +157,7 @@ export default async function HomePage() {
         </div>
 
         {/* Right: mini graph preview */}
-        <div style={{ position: "relative", zIndex: 2 }}>
+        <div className="hero-right" style={{ position: "relative", zIndex: 2 }}>
           <div style={{
             background: "var(--paper-0)",
             border: "1px solid var(--paper-line)",

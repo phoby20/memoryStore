@@ -99,3 +99,15 @@ input, textarea, select { font-family: inherit; }
   0%, 100% { opacity: 0.7; }
   50% { opacity: 1; }
 }
+
+/* ── Landing page responsive ────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero-section {
+    grid-template-columns: 1fr !important;
+    padding: 48px 24px 60px !important;
+    overflow: visible !important;
+  }
+  .hero-right {
+    display: none !important;
+  }
+}

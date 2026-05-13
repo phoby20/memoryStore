@@ -5,7 +5,7 @@ type PrismaClientT = InstanceType<typeof PrismaClient>;
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClientT | undefined };
 
 function createPrismaClient(): PrismaClientT {
-  const url = process.env.DATABASE_URL!;
+  const url = process.env.DATABASE_URL ?? "";
   if (url.startsWith("prisma+postgres://")) {
     return new PrismaClient({ accelerateUrl: url }) as PrismaClientT;
   }
