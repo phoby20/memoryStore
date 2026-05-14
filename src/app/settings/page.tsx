@@ -126,7 +126,7 @@ export default function SettingsPage() {
             <div style={{ background: "var(--paper-0)", border: "1px solid var(--paper-line)", borderRadius: 12, padding: 24 }}>
               <p style={{ fontFamily: "var(--font-serif)", fontSize: 16, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 6px" }}>새 키 발급</p>
               <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 16px" }}>연결할 AI 서비스마다 고유한 키를 발급하시는 것을 권장합니다.</p>
-              <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <input
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
@@ -134,7 +134,7 @@ export default function SettingsPage() {
                   placeholder="키 이름 (예: Claude Desktop)"
                   maxLength={50}
                   style={{
-                    flex: 1, padding: "10px 14px",
+                    flex: 1, minWidth: 0, padding: "10px 14px",
                     background: "var(--paper-1)", border: "1px solid var(--paper-line)",
                     borderRadius: 8, fontSize: 13, color: "var(--ink-1)", outline: "none",
                   }}
@@ -180,7 +180,7 @@ export default function SettingsPage() {
                   <div key={key.id} style={{
                     background: "var(--paper-0)", border: "1px solid var(--paper-line)",
                     borderRadius: 10, padding: "16px 20px",
-                    display: "flex", alignItems: "center", gap: 16,
+                    display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap",
                   }}>
                     <div style={{ width: 4, height: 36, background: "var(--glow)", borderRadius: 999, flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -295,7 +295,7 @@ const SERVICES: { id: ServiceId; glyph: string; name: string; badge: string; fre
 function CodeBlock({ children, label }: { children: string; label?: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <div style={{ position: "relative", marginTop: 10 }}>
+    <div style={{ position: "relative", marginTop: 10, maxWidth: "100%", minWidth: 0 }}>
       {label && (
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-4)", marginBottom: 4 }}>{label}</div>
       )}
@@ -304,6 +304,7 @@ function CodeBlock({ children, label }: { children: string; label?: string }) {
         background: "var(--paper-2)", border: "1px solid var(--paper-line)",
         borderRadius: 8, padding: "14px 16px", margin: 0,
         overflowX: "auto", lineHeight: 1.65, whiteSpace: "pre",
+        maxWidth: "100%",
       }}>{children}</pre>
       <button
         onClick={() => { navigator.clipboard.writeText(children); setCopied(true); setTimeout(() => setCopied(false), 1800); }}
@@ -330,7 +331,7 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
         fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
         flexShrink: 0, marginTop: 1,
       }}>{n}</div>
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 8px" }}>{title}</p>
         {children}
       </div>

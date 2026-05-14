@@ -184,6 +184,12 @@ input, textarea, select { font-family: inherit; }
   }
 
   /* Settings */
-  .settings-main { padding: 20px 16px !important; max-width: 100% !important; }
+  .settings-main { padding: 20px 16px !important; max-width: 100% !important; overflow-x: hidden; }
   .connect-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Code blocks: constrain width so pre scrolls internally, not the page */
+  .settings-main pre {
+    max-width: 100%;
+    font-size: 11px;
+  }
 }
