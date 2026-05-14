@@ -149,7 +149,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div style={{ marginTop: 32, display: "flex", alignItems: "center", gap: 20, fontSize: 12, color: "var(--ink-4)" }}>
+          <div style={{ marginTop: 32, display: "flex", alignItems: "center", gap: 20, fontSize: 12, color: "var(--ink-4)", flexWrap: "wrap" }}>
             <span>✓ 무료로 시작</span>
             <span>✓ Google 계정 연동</span>
             <span>✓ 언제든 데이터 내보내기</span>

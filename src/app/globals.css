@@ -158,6 +158,16 @@ input, textarea, select { font-family: inherit; }
     justify-content: center !important;
     gap: 4px !important;
   }
+  .sidebar-nav-item {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 3px !important;
+    padding: 6px 10px !important;
+    font-size: 10px !important;
+  }
+  .sidebar-nav-label {
+    white-space: nowrap;
+  }
   .sidebar-bottom {
     margin-top: 0 !important;
     padding: 0 !important;

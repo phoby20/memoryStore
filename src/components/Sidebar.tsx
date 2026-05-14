@@ -69,6 +69,7 @@ export default function Sidebar() {
           <Link
             key={it.id}
             href={it.href}
+            className="sidebar-nav-item"
             style={{
               display: "flex",
               alignItems: "center",
@@ -88,7 +89,7 @@ export default function Sidebar() {
               textAlign: "center",
               color: active === it.id ? "var(--glow)" : "var(--ink-4)",
             }}>{it.icon}</span>
-            {it.label}
+            <span className="sidebar-nav-label">{it.label}</span>
           </Link>
         ))}
       </div>
