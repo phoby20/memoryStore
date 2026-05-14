@@ -121,9 +121,9 @@ export default function DashboardPage() {
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--paper-1)" }}>
       <Sidebar />
 
-      <main style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+      <main className="app-main" style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         {/* Top bar */}
-        <div style={{
+        <div className="dashboard-topbar" style={{
           padding: "24px 32px 0",
           display: "flex",
           alignItems: "flex-end",
@@ -179,7 +179,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, padding: "20px 32px 0" }}>
+        <div className="dashboard-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, padding: "20px 32px 0" }}>
           {[
             { k: "저장된 기억", v: memories.length, glow: true },
             { k: "카테고리", v: categories.length - 1 },
@@ -202,7 +202,7 @@ export default function DashboardPage() {
 
         {/* Add form */}
         {showAdd && (
-          <div style={{
+          <div className="dashboard-add-form" style={{
             margin: "20px 32px 0",
             background: "var(--paper-0)",
             border: "1px solid var(--paper-line)",
@@ -210,7 +210,7 @@ export default function DashboardPage() {
             padding: 20,
           }}>
             <p style={{ fontFamily: "var(--font-serif)", fontSize: 15, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 16px" }}>새 기억 추가</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr 2fr", gap: 10, marginBottom: 12 }}>
+            <div className="dashboard-add-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr 2fr", gap: 10, marginBottom: 12 }}>
               <div>
                 <label style={{ display: "block", fontSize: 11, color: "var(--ink-4)", marginBottom: 4 }}>카테고리</label>
                 <select
@@ -251,7 +251,7 @@ export default function DashboardPage() {
         )}
 
         {/* Main content area */}
-        <div style={{ flex: 1, display: "flex", gap: 0, padding: "20px 32px 32px" }}>
+        <div className="dashboard-content" style={{ flex: 1, display: "flex", gap: 0, padding: "20px 32px 32px" }}>
           {view === "graph" ? (
             <>
               {/* Graph canvas */}
@@ -336,7 +336,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Right rail — selected memory */}
-              <div style={{
+              <div className="dashboard-right-rail" style={{
                 width: 320,
                 marginLeft: 16,
                 background: "var(--paper-0)",

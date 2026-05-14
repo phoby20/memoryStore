@@ -88,7 +88,7 @@ export default function SettingsPage() {
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--paper-1)" }}>
       <Sidebar />
 
-      <main style={{ flex: 1, padding: "28px 48px", maxWidth: 900 }}>
+      <main className="app-main settings-main" style={{ flex: 1, padding: "28px 48px", maxWidth: 900 }}>
         <div style={{ marginBottom: 8 }}>
           <div style={{ fontSize: 11, letterSpacing: "0.1em", color: "var(--ink-4)", textTransform: "uppercase", marginBottom: 6 }}>
             워크스페이스
@@ -369,7 +369,7 @@ function ConnectGuide() {
       </div>
 
       {/* Service selector */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
+      <div className="connect-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
         {SERVICES.map((s) => (
           <button key={s.id} onClick={() => setSelected(s.id)} style={{
             padding: "12px 14px",

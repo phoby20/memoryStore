@@ -41,7 +41,7 @@ export default function Sidebar() {
   const { theme, toggle } = useTheme();
 
   return (
-    <nav style={{
+    <nav className="sidebar" style={{
       width: 256,
       padding: "28px 18px",
       borderRight: "1px solid var(--paper-line)",
@@ -54,44 +54,46 @@ export default function Sidebar() {
       top: 0,
       flexShrink: 0,
     }}>
-      <div style={{ padding: "0 8px 24px" }}>
+      <div className="sidebar-logo-area" style={{ padding: "0 8px 24px" }}>
         <Link href="/dashboard" style={{ textDecoration: "none" }}>
           <Logo />
         </Link>
       </div>
 
-      <div style={{ fontSize: 10, color: "var(--ink-4)", padding: "12px 12px 6px", letterSpacing: "0.1em" }}>
+      <div className="sidebar-workspace-label" style={{ fontSize: 10, color: "var(--ink-4)", padding: "12px 12px 6px", letterSpacing: "0.1em" }}>
         WORKSPACE
       </div>
 
-      {items.map((it) => (
-        <Link
-          key={it.id}
-          href={it.href}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            padding: "10px 12px",
-            fontSize: 13,
-            color: active === it.id ? "var(--ink-1)" : "var(--ink-3)",
-            background: active === it.id ? "var(--paper-2)" : "transparent",
-            borderRadius: 6,
-            textDecoration: "none",
-            fontWeight: active === it.id ? 600 : 400,
-            transition: "background 0.15s",
-          }}
-        >
-          <span style={{
-            width: 16,
-            textAlign: "center",
-            color: active === it.id ? "var(--glow)" : "var(--ink-4)",
-          }}>{it.icon}</span>
-          {it.label}
-        </Link>
-      ))}
+      <div className="sidebar-nav" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {items.map((it) => (
+          <Link
+            key={it.id}
+            href={it.href}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "10px 12px",
+              fontSize: 13,
+              color: active === it.id ? "var(--ink-1)" : "var(--ink-3)",
+              background: active === it.id ? "var(--paper-2)" : "transparent",
+              borderRadius: 6,
+              textDecoration: "none",
+              fontWeight: active === it.id ? 600 : 400,
+              transition: "background 0.15s",
+            }}
+          >
+            <span style={{
+              width: 16,
+              textAlign: "center",
+              color: active === it.id ? "var(--glow)" : "var(--ink-4)",
+            }}>{it.icon}</span>
+            {it.label}
+          </Link>
+        ))}
+      </div>
 
-      <div style={{ marginTop: "auto", padding: "16px 8px 0", borderTop: "1px dashed var(--paper-line)" }}>
+      <div className="sidebar-bottom" style={{ marginTop: "auto", padding: "16px 8px 0", borderTop: "1px dashed var(--paper-line)" }}>
         {/* Theme toggle */}
         <button
           onClick={toggle}

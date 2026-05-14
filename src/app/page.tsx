@@ -29,7 +29,7 @@ export default async function HomePage() {
   return (
     <div style={{ background: "var(--paper-1)", minHeight: "100vh" }}>
       {/* Header */}
-      <header style={{
+      <header className="landing-header" style={{
         position: "relative",
         zIndex: 5,
         display: "flex",
@@ -40,8 +40,8 @@ export default async function HomePage() {
         background: "var(--paper-1)",
       }}>
         <Logo />
-        <nav style={{ display: "flex", alignItems: "center", gap: 24, fontSize: 14, color: "var(--ink-3)" }}>
-          <Link href="/sign-in" style={{
+        <nav className="landing-nav" style={{ display: "flex", alignItems: "center", gap: 24, fontSize: 14, color: "var(--ink-3)" }}>
+          <Link className="landing-nav-start" href="/sign-in" style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             padding: "8px 16px", borderRadius: 8, border: "1px solid var(--paper-line)",
             background: "transparent", color: "var(--ink-2)", textDecoration: "none",
@@ -225,7 +225,7 @@ export default async function HomePage() {
       </section>
 
       {/* How it works */}
-      <section style={{ padding: "60px 48px 80px" }}>
+      <section className="landing-steps" style={{ padding: "60px 48px 80px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <div style={{ fontSize: 11, letterSpacing: "0.12em", color: "var(--ink-4)", textTransform: "uppercase", marginBottom: 12 }}>
@@ -235,7 +235,7 @@ export default async function HomePage() {
               세 단계면 충분합니다
             </h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
+          <div className="landing-steps-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
             {[
               {
                 n: "01", t: "API 키 발급",
@@ -293,7 +293,7 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer style={{
+      <footer className="landing-footer" style={{
         padding: "32px 48px",
         borderTop: "1px solid var(--paper-line)",
         display: "flex",
@@ -304,7 +304,7 @@ export default async function HomePage() {
       }}>
         <Logo size={20} />
         <span>© 2026 Memory Store · 당신의 기억은 당신의 것입니다.</span>
-        <div style={{ display: "flex", gap: 20 }}>
+        <div className="landing-footer-links" style={{ display: "flex", gap: 20 }}>
           <Link href="/terms" style={{ color: "var(--ink-4)", textDecoration: "none" }}>이용약관</Link>
           <Link href="/privacy" style={{ color: "var(--ink-4)", textDecoration: "none" }}>개인정보 처리방침</Link>
         </div>
