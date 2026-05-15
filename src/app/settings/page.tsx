@@ -382,8 +382,7 @@ function ConnectGuide() {
       }}>
         <span style={{ color: "var(--success)", fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓ 무료 시작</span>
         <span>
-          <strong style={{ color: "var(--ink-1)" }}>Claude Desktop</strong>과{" "}
-          <strong style={{ color: "var(--ink-1)" }}>Gemini CLI</strong>는 무료로 즉시 테스트할 수 있습니다.
+          Node.js 설치 없이 <strong style={{ color: "var(--ink-1)" }}>URL + API 키</strong>만으로 연결됩니다.
           시작 전에 <strong style={{ color: "var(--ink-1)" }}>API 키</strong> 탭에서 키를 먼저 발급해 두세요.
         </span>
       </div>
@@ -532,11 +531,10 @@ function GuideClaudeDesktop({ serviceUrl }: { serviceUrl: string }) {
           <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "rgba(107,142,90,0.15)", color: "var(--success)" }}>무료 가능</span>
         </div>
         <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 10px", lineHeight: 1.7 }}>
-          Claude Desktop에 Memory Store를 연결하면, 평소처럼 Claude와 대화하는 것만으로 당신의 기억이 자동으로 저장되고 불러와집니다.
-          한 번 설정하면 이후에는 별도 조작 없이 Claude가 알아서 기억을 활용합니다.
+          Claude Desktop에 Memory Store를 연결하면, 평소처럼 Claude와 대화하는 것만으로 기억이 자동으로 저장되고 불러와집니다.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 12, color: "var(--ink-4)", padding: "10px 14px", background: "var(--paper-2)", borderRadius: 6 }}>
-          <span>⏱ 예상 소요 시간: 약 10~15분</span>
+          <span>⏱ 예상 소요 시간: 약 2~3분</span>
           <span>💻 필요 환경: Mac 또는 Windows PC</span>
           <span>💰 비용: 무료 (Claude 계정 필요)</span>
         </div>
@@ -549,96 +547,60 @@ function GuideClaudeDesktop({ serviceUrl }: { serviceUrl: string }) {
           </p>
           <div style={{ background: "var(--paper-2)", border: "1px solid var(--paper-line)", borderRadius: 6, padding: "10px 14px", fontSize: 13, margin: "4px 0 10px" }}>
             🌐 <a href="https://claude.ai/download" target="_blank" rel="noreferrer" style={{ color: "var(--glow-deep)", fontWeight: 600 }}>claude.ai/download</a>
-            <span style={{ color: "var(--ink-4)", marginLeft: 8 }}>→ 운영체제에 맞는 버전 다운로드 → 설치</span>
+            <span style={{ color: "var(--ink-4)", marginLeft: 8 }}>→ 운영체제에 맞는 버전 다운로드 → 설치 후 로그인</span>
           </div>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7, margin: 0 }}>
-            설치 후 앱을 실행하고 Claude 계정으로 로그인합니다. 계정이 없다면 <strong>무료로 가입</strong>할 수 있습니다.
-          </p>
         </Step>
 
-        <McpServerPrepSection serviceUrl={serviceUrl} />
-
-        <Step n={6} title="Claude Desktop 설정 파일 열기">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 12px", lineHeight: 1.7 }}>
-            Claude Desktop의 설정 파일에 Memory Store 연결 정보를 추가합니다.
-            파일이 없으면 직접 만들어야 합니다.
-          </p>
-
-          <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 700, margin: "0 0 6px" }}>🍎 Mac 사용자</p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 4px", lineHeight: 1.7 }}>
-            ① Finder를 열고 상단 메뉴에서 <strong>이동 → 폴더로 이동</strong>을 클릭합니다. (단축키: ⌘⇧G)
-          </p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 4px", lineHeight: 1.7 }}>
-            ② 아래 경로를 그대로 복사해서 붙여넣고 Enter를 누릅니다.
-          </p>
-          <CodeBlock label="경로 (그대로 복사해서 붙여넣기)">{`~/Library/Application Support/Claude`}</CodeBlock>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 4px", lineHeight: 1.7 }}>
-            ③ 폴더 안에 <Inline>claude_desktop_config.json</Inline> 파일이 있으면 텍스트 편집기로 열고,
-            없으면 새로 만듭니다.
-          </p>
-          <Tip>💡 텍스트 편집기: Mac 기본 앱 &ldquo;텍스트 편집기(TextEdit)&rdquo; 사용 가능. 단, 파일을 열면 상단 메뉴 &ldquo;포맷 → 일반 텍스트 만들기&rdquo;를 먼저 클릭하세요.</Tip>
-
-          <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 700, margin: "16px 0 6px" }}>🪟 Windows 사용자</p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 4px", lineHeight: 1.7 }}>
-            ① Windows 탐색기 주소창에 아래 경로를 입력하고 Enter를 누릅니다.
-          </p>
-          <CodeBlock label="탐색기 주소창">{`%APPDATA%\Claude`}</CodeBlock>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 4px", lineHeight: 1.7 }}>
-            ② 폴더 안에 <Inline>claude_desktop_config.json</Inline> 파일이 있으면 메모장으로 열고,
-            없으면 새 텍스트 파일을 만들고 이름을 <Inline>claude_desktop_config.json</Inline>으로 변경합니다.
-          </p>
-          <Note>⚠ 파일 이름을 바꿀 때 확장자가 <Inline>.json</Inline>인지 확인하세요. 탐색기에서 &ldquo;파일 이름 확장명 표시&rdquo;를 켜두면 확인하기 쉽습니다.</Note>
-        </Step>
-
-        <Step n={7} title="설정 파일에 연결 정보 입력">
+        <Step n={2} title="API 키 발급">
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            파일 안의 내용을 모두 지우고 아래 내용을 붙여넣은 뒤, <strong>3곳</strong>을 수정합니다.
+            위의 <strong>API 키</strong> 탭을 클릭해 새 키를 발급하고 복사해 두세요.
+          </p>
+          <Tip>💡 서비스별로 키를 별도로 발급하면 나중에 특정 서비스만 차단할 수 있습니다. (예: &ldquo;Claude Desktop용 키&rdquo;)</Tip>
+        </Step>
+
+        <Step n={3} title="설정 파일 수정">
+          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
+            아래 경로의 파일을 텍스트 편집기로 엽니다. 파일이 없으면 새로 만드세요.
+          </p>
+          <CodeBlock label="설정 파일 위치 — Mac">{`~/Library/Application Support/Claude/claude_desktop_config.json`}</CodeBlock>
+          <CodeBlock label="설정 파일 위치 — Windows">{`%APPDATA%\\Claude\\claude_desktop_config.json`}</CodeBlock>
+          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "10px 0 6px", lineHeight: 1.7 }}>
+            파일 내용 전체를 아래 내용으로 바꿉니다. <strong>API 키 한 곳</strong>만 수정하면 됩니다.
           </p>
           <CodeBlock label="claude_desktop_config.json">{`{
   "mcpServers": {
     "memory-store": {
-      "command": "node",
-      "args": ["여기에_mcp-server/index.js_의_전체경로"],
-      "env": {
-        "MEMORY_STORE_URL": "${serviceUrl}",
-        "MEMORY_STORE_API_KEY": "여기에_API_키_입력"
+      "url": "${serviceUrl}/api/mcp",
+      "headers": {
+        "Authorization": "Bearer 여기에_API_키_입력"
       }
     }
   }
 }`}</CodeBlock>
-          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
             <div style={{ padding: "10px 14px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
-              <strong style={{ color: "var(--glow-deep)" }}>① args 경로</strong> — 5단계에서 복사해 둔 경로로 교체합니다.<br />
-              예시 (Mac): <Inline>/Users/홍길동/Documents/memoryStore-main/mcp-server/index.js</Inline><br />
-              예시 (Windows): <Inline>C:\Users\홍길동\Documents\memoryStore-main\mcp-server\index.js</Inline>
+              <strong style={{ color: "var(--glow-deep)" }}>① url</strong> — 이미 올바르게 입력되어 있습니다. 수정 불필요.
             </div>
             <div style={{ padding: "10px 14px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
-              <strong style={{ color: "var(--glow-deep)" }}>② MEMORY_STORE_URL</strong> — 이미 올바르게 입력되어 있습니다: <Inline>{serviceUrl}</Inline>
-            </div>
-            <div style={{ padding: "10px 14px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
-              <strong style={{ color: "var(--glow-deep)" }}>③ MEMORY_STORE_API_KEY</strong> — 1단계에서 발급한 API 키를 입력합니다.
+              <strong style={{ color: "var(--glow-deep)" }}>② Authorization</strong> — <Inline>여기에_API_키_입력</Inline> 부분을 2단계에서 발급한 키로 교체합니다.
             </div>
           </div>
-          <Note>⚠ Windows 경로의 역슬래시(<Inline>\</Inline>)는 <Inline>\\</Inline> 두 개로 써야 합니다. 예: <Inline>C:\\Users\\홍길동\\...</Inline></Note>
+          <Note>ⓘ 파일을 새로 만들 때: Mac은 TextEdit 앱을 열고 &ldquo;포맷 → 일반 텍스트 만들기&rdquo;를 먼저 클릭하세요. Windows는 메모장을 사용하세요.</Note>
         </Step>
 
-        <Step n={8} title="Claude Desktop 재시작 및 연결 확인">
+        <Step n={4} title="Claude Desktop 재시작 및 연결 확인">
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            설정 파일을 저장한 뒤, Claude Desktop을 <strong>완전히 종료</strong>하고 다시 실행합니다.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 4px", lineHeight: 1.7 }}>
-            <strong>연결 확인 방법:</strong> 채팅 입력창 하단에 작은 🔧 아이콘 또는 <strong>memory-store</strong>가 표시되면 연결 성공입니다.
+            설정 파일을 저장한 뒤 Claude Desktop을 <strong>완전히 종료</strong>하고 다시 실행합니다.
           </p>
           <Tip>
-            💡 연결이 잘 됐는지 테스트하려면 Claude에게 이렇게 말해보세요:<br />
-            <em style={{ color: "var(--ink-2)" }}>&ldquo;내 Memory Store에 저장된 기억을 불러와줘&rdquo;</em>
+            💡 채팅 입력창 하단에 🔧 아이콘 또는 <strong>memory-store</strong>가 표시되면 연결 성공입니다.<br />
+            <em style={{ color: "var(--ink-2)" }}>&ldquo;내 Memory Store에 저장된 기억을 불러와줘&rdquo;</em>라고 입력해 테스트해보세요.
           </Tip>
           <Note>
-            ⚠ <strong>연결이 안 된다면 확인할 것들:</strong><br />
-            • 설정 파일의 경로에 오타가 없는지 확인 (복사·붙여넣기 권장)<br />
-            • Windows 경로의 역슬래시가 <Inline>\\</Inline>로 되어 있는지 확인<br />
-            • Node.js가 설치되어 있는지 확인 (<Inline>node --version</Inline> 명령 실행)<br />
-            • <Inline>mcp-server</Inline> 폴더에서 <Inline>npm install</Inline>을 실행했는지 확인
+            ⚠ <strong>연결이 안 된다면:</strong><br />
+            • url과 API 키에 오타가 없는지 확인 (복사·붙여넣기 권장)<br />
+            • Claude Desktop을 트레이 아이콘까지 완전히 종료했는지 확인<br />
+            • 파일 이름이 정확히 <Inline>claude_desktop_config.json</Inline>인지 확인
           </Note>
         </Step>
       </div>
@@ -657,76 +619,67 @@ function GuideGeminiCli({ serviceUrl }: { serviceUrl: string }) {
           <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "rgba(107,142,90,0.15)", color: "var(--success)" }}>완전 무료</span>
         </div>
         <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 10px", lineHeight: 1.7 }}>
-          Google의 무료 AI 도구입니다. Google 계정만 있으면 별도 결제 없이 터미널에서 Gemini를 사용할 수 있으며,
-          Memory Store와 연결하면 대화 내용을 자동으로 기억에 저장합니다.
+          Google의 무료 AI 도구입니다. Google 계정만 있으면 별도 결제 없이 터미널에서 Gemini를 사용할 수 있습니다.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 12, color: "var(--ink-4)", padding: "10px 14px", background: "var(--paper-2)", borderRadius: 6 }}>
-          <span>⏱ 예상 소요 시간: 약 10분</span>
-          <span>💻 필요 환경: Mac 또는 Windows PC (터미널 사용)</span>
+          <span>⏱ 예상 소요 시간: 약 5분 (Gemini CLI 신규 설치 시 10분)</span>
           <span>💰 비용: 완전 무료 (Google 계정 필요)</span>
         </div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <McpServerPrepSection serviceUrl={serviceUrl} />
-
-        <Step n={6} title="Gemini CLI 설치">
+        <Step n={1} title="Gemini CLI 설치 및 로그인">
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            터미널에서 아래 명령을 실행합니다. (인터넷 연결 필요)
+            아직 Gemini CLI가 없다면 터미널에서 설치합니다. (Node.js 필요)
           </p>
           <CodeBlock label="터미널">{`npm install -g @google/gemini-cli`}</CodeBlock>
-          <Tip>💡 설치 후 <Inline>gemini --version</Inline>을 실행해서 버전 번호가 나오면 설치 성공입니다.</Tip>
-        </Step>
-
-        <Step n={7} title="Google 계정으로 로그인">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            터미널에서 <Inline>gemini</Inline>를 입력해 실행합니다.
-            처음 실행하면 브라우저가 자동으로 열리며 Google 계정 로그인을 요청합니다.
-          </p>
-          <CodeBlock label="터미널">{`gemini`}</CodeBlock>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 0", lineHeight: 1.7 }}>
-            Google 계정으로 로그인하면 로그인 완료 메시지가 표시됩니다. 터미널로 돌아와 <strong>Ctrl+C</strong>로 종료합니다.
+          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 4px", lineHeight: 1.7 }}>
+            설치 후 <Inline>gemini</Inline>를 실행하면 브라우저로 Google 계정 로그인을 요청합니다.
           </p>
         </Step>
 
-        <Step n={8} title="Memory Store 연결 설정">
+        <Step n={2} title="API 키 발급">
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            Gemini CLI 설정 파일에 Memory Store 연결 정보를 추가합니다.
+            위의 <strong>API 키</strong> 탭에서 새 키를 발급하고 복사해 두세요.
           </p>
-          <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "0 0 4px" }}>① 설정 파일을 열어 수정합니다.</p>
-          <CodeBlock label="Mac / Linux — 터미널">{`open ~/.gemini/settings.json`}</CodeBlock>
-          <p style={{ fontSize: 12, color: "var(--ink-4)", margin: "4px 0 8px" }}>파일이 없으면 텍스트 편집기에서 새로 만들고 위 경로에 저장하세요.</p>
-          <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "0 0 4px" }}>② 아래 내용을 붙여넣고 2곳을 수정합니다.</p>
+          <Tip>💡 서비스별로 키를 별도로 발급하면 나중에 특정 서비스만 차단할 수 있습니다.</Tip>
+        </Step>
+
+        <Step n={3} title="설정 파일 수정">
+          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
+            아래 경로의 파일을 텍스트 편집기로 엽니다. 파일이 없으면 새로 만드세요.
+          </p>
+          <CodeBlock label="설정 파일 위치 — Mac / Linux">{`~/.gemini/settings.json`}</CodeBlock>
+          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 6px", lineHeight: 1.7 }}>
+            파일 내용 전체를 아래 내용으로 바꿉니다. <strong>API 키 한 곳</strong>만 수정하면 됩니다.
+          </p>
           <CodeBlock label="~/.gemini/settings.json">{`{
   "mcpServers": {
     "memory-store": {
-      "command": "node",
-      "args": ["여기에_mcp-server/index.js_의_전체경로"],
-      "env": {
-        "MEMORY_STORE_URL": "${serviceUrl}",
-        "MEMORY_STORE_API_KEY": "여기에_API_키_입력"
+      "url": "${serviceUrl}/api/mcp",
+      "headers": {
+        "Authorization": "Bearer 여기에_API_키_입력"
       }
     }
   }
 }`}</CodeBlock>
           <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
-            <div style={{ padding: "8px 12px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
-              <strong style={{ color: "var(--glow-deep)" }}>① args 경로</strong> — 5단계에서 확인한 index.js 전체 경로로 교체
+            <div style={{ padding: "10px 14px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
+              <strong style={{ color: "var(--glow-deep)" }}>① url</strong> — 이미 올바르게 입력되어 있습니다. 수정 불필요.
             </div>
-            <div style={{ padding: "8px 12px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
-              <strong style={{ color: "var(--glow-deep)" }}>② MEMORY_STORE_API_KEY</strong> — 1단계에서 발급한 API 키 입력
+            <div style={{ padding: "10px 14px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
+              <strong style={{ color: "var(--glow-deep)" }}>② Authorization</strong> — <Inline>여기에_API_키_입력</Inline> 부분을 2단계에서 발급한 키로 교체합니다.
             </div>
           </div>
         </Step>
 
-        <Step n={9} title="연결 확인">
+        <Step n={4} title="연결 확인">
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            터미널에서 Gemini CLI를 다시 실행합니다.
+            터미널에서 Gemini CLI를 다시 실행하고 테스트합니다.
           </p>
           <CodeBlock label="터미널">{`gemini`}</CodeBlock>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 4px", lineHeight: 1.7 }}>실행 후 대화창에서 아래 메시지를 입력해 테스트합니다.</p>
           <CodeBlock>{`내 Memory Store에 저장된 기억을 불러와줘`}</CodeBlock>
-          <Tip>💡 <Inline>/mcp</Inline>를 입력하면 연결된 MCP 서버 목록과 사용 가능한 도구를 확인할 수 있습니다.</Tip>
+          <Tip>💡 <Inline>/mcp</Inline>를 입력하면 연결된 MCP 서버 목록을 확인할 수 있습니다.</Tip>
         </Step>
       </div>
     </>
@@ -741,32 +694,33 @@ function GuideClaudeCode({ serviceUrl }: { serviceUrl: string }) {
       <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 6px" }}>Claude Code 연결 가이드</h2>
       <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 20px", lineHeight: 1.7 }}>
         터미널에서 사용하는 Claude Code CLI에 Memory Store를 연결합니다.
-        Claude Code가 이미 설치되어 있고 터미널 사용에 익숙하다면 빠르게 설정할 수 있습니다.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <McpServerPrepSection serviceUrl={serviceUrl} />
+        <Step n={1} title="API 키 발급">
+          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0, lineHeight: 1.7 }}>
+            위의 <strong>API 키</strong> 탭에서 새 키를 발급하고 복사해 두세요.
+          </p>
+        </Step>
 
-        <Step n={6} title="Claude Code에 MCP 서버 등록">
+        <Step n={2} title="Claude Code에 MCP 서버 등록">
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            아래 명령을 실행합니다. 경로와 API 키를 실제 값으로 바꿔 입력하세요.
+            터미널에서 아래 명령을 실행합니다. API 키만 교체하면 됩니다.
           </p>
           <CodeBlock label="터미널">{`claude mcp add memory-store \\
-  -e MEMORY_STORE_URL=${serviceUrl} \\
-  -e MEMORY_STORE_API_KEY=여기에_API_키_입력 \\
-  -- node /여기에_mcp-server/index.js_의_전체경로`}</CodeBlock>
+  --transport http \\
+  --url ${serviceUrl}/api/mcp \\
+  --header "Authorization: Bearer 여기에_API_키_입력"`}</CodeBlock>
           <Tip>💡 등록 후 <Inline>claude mcp list</Inline>를 실행해 memory-store가 목록에 나오면 성공입니다.</Tip>
         </Step>
 
-        <Step n={7} title="연결 확인">
+        <Step n={3} title="연결 확인">
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
             Claude Code 세션을 시작하고 슬래시 명령으로 확인합니다.
           </p>
           <CodeBlock label="터미널">{`claude`}</CodeBlock>
           <p style={{ fontSize: 12, color: "var(--ink-4)", margin: "6px 0 4px" }}>세션 안에서:</p>
           <CodeBlock>{`/mcp`}</CodeBlock>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 0", lineHeight: 1.7 }}>
-            <Inline>memory-store</Inline>가 목록에 표시되면 연결 완료입니다.
-          </p>
+          <Tip>💡 <Inline>memory-store</Inline>가 목록에 표시되면 연결 완료입니다.</Tip>
         </Step>
       </div>
     </>
@@ -784,28 +738,30 @@ function GuideVSCodeCopilot({ serviceUrl }: { serviceUrl: string }) {
         VS Code 1.99 이상, GitHub Copilot 구독이 필요합니다.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <McpServerPrepSection serviceUrl={serviceUrl} />
+        <Step n={1} title="API 키 발급">
+          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0, lineHeight: 1.7 }}>
+            위의 <strong>API 키</strong> 탭에서 새 키를 발급하고 복사해 두세요.
+          </p>
+        </Step>
 
-        <Step n={6} title="VS Code 사용자 설정에 MCP 등록">
+        <Step n={2} title="VS Code 사용자 설정에 MCP 등록">
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
             ① VS Code에서{" "}
             <kbd style={{ fontFamily: "var(--font-mono)", fontSize: 11, background: "var(--paper-2)", padding: "2px 6px", borderRadius: 3, border: "1px solid var(--paper-line)" }}>⌘ Shift P</kbd>
             {" "}(Windows: <kbd style={{ fontFamily: "var(--font-mono)", fontSize: 11, background: "var(--paper-2)", padding: "2px 6px", borderRadius: 3, border: "1px solid var(--paper-line)" }}>Ctrl Shift P</kbd>)
-            를 눌러 명령 팔레트를 열고 <strong>Open User Settings (JSON)</strong>을 검색해 클릭합니다.
+            를 눌러 <strong>Open User Settings (JSON)</strong>을 검색해 클릭합니다.
           </p>
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ② 열린 JSON 파일에 아래 내용을 추가합니다. (기존 내용이 있다면 마지막 항목 뒤에 추가)
+            ② 열린 JSON 파일에 아래 내용을 추가합니다. <strong>API 키 한 곳</strong>만 수정하면 됩니다.
           </p>
           <CodeBlock label="settings.json">{`{
   "mcp": {
     "servers": {
       "memory-store": {
-        "type": "stdio",
-        "command": "node",
-        "args": ["여기에_mcp-server/index.js_의_전체경로"],
-        "env": {
-          "MEMORY_STORE_URL": "${serviceUrl}",
-          "MEMORY_STORE_API_KEY": "여기에_API_키_입력"
+        "type": "http",
+        "url": "${serviceUrl}/api/mcp",
+        "headers": {
+          "Authorization": "Bearer 여기에_API_키_입력"
         }
       }
     }
@@ -813,15 +769,15 @@ function GuideVSCodeCopilot({ serviceUrl }: { serviceUrl: string }) {
 }`}</CodeBlock>
         </Step>
 
-        <Step n={7} title="Copilot Chat Agent 모드에서 확인">
+        <Step n={3} title="Copilot Chat Agent 모드에서 확인">
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ① VS Code 좌측 아이콘에서 <strong>Copilot Chat</strong> 아이콘을 클릭합니다.
+            ① VS Code 좌측에서 <strong>Copilot Chat</strong> 아이콘을 클릭합니다.
           </p>
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ② 채팅 입력창 위쪽에서 모드를 <strong>Agent</strong>로 전환합니다.
+            ② 채팅 입력창 위쪽 모드를 <strong>Agent</strong>로 전환합니다.
           </p>
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ③ 입력창 옆 <strong>도구(🔧) 버튼</strong>을 클릭해 memory-store 도구가 목록에 있는지 확인합니다.
+            ③ 입력창 옆 <strong>도구(🔧) 버튼</strong>을 클릭해 memory-store가 목록에 있는지 확인합니다.
           </p>
           <Note>⚠ <strong>Ask 또는 Edit 모드에서는 MCP 도구가 보이지 않습니다.</strong> 반드시 <strong>Agent 모드</strong>로 전환해야 합니다.</Note>
         </Step>
@@ -840,36 +796,42 @@ function GuideCursor({ serviceUrl }: { serviceUrl: string }) {
         AI 코드 에디터 Cursor에 Memory Store를 연결해, 코딩 중에도 개인 기억에 접근할 수 있습니다.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <McpServerPrepSection serviceUrl={serviceUrl} />
-
-        <Step n={6} title="Cursor MCP 설정 파일 만들기">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            아래 내용으로 파일을 만듭니다.
-            모든 프로젝트에서 사용하려면 홈 디렉터리에, 특정 프로젝트에서만 사용하려면 해당 프로젝트 폴더 안에 저장합니다.
+        <Step n={1} title="API 키 발급">
+          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0, lineHeight: 1.7 }}>
+            위의 <strong>API 키</strong> 탭에서 새 키를 발급하고 복사해 두세요.
           </p>
-          <CodeBlock label="저장 위치 — Mac: ~/.cursor/mcp.json  /  Windows: C:\Users\이름\.cursor\mcp.json">{`{
+        </Step>
+
+        <Step n={2} title="Cursor MCP 설정 파일 수정">
+          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
+            아래 경로의 파일을 텍스트 편집기로 엽니다. 파일이 없으면 새로 만드세요.
+          </p>
+          <CodeBlock label="설정 파일 위치 — Mac / Linux">{`~/.cursor/mcp.json`}</CodeBlock>
+          <CodeBlock label="설정 파일 위치 — Windows">{`C:\\Users\\사용자이름\\.cursor\\mcp.json`}</CodeBlock>
+          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 6px", lineHeight: 1.7 }}>
+            파일 내용 전체를 아래 내용으로 바꿉니다. <strong>API 키 한 곳</strong>만 수정하면 됩니다.
+          </p>
+          <CodeBlock label="~/.cursor/mcp.json">{`{
   "mcpServers": {
     "memory-store": {
-      "command": "node",
-      "args": ["여기에_mcp-server/index.js_의_전체경로"],
-      "env": {
-        "MEMORY_STORE_URL": "${serviceUrl}",
-        "MEMORY_STORE_API_KEY": "여기에_API_키_입력"
+      "url": "${serviceUrl}/api/mcp",
+      "headers": {
+        "Authorization": "Bearer 여기에_API_키_입력"
       }
     }
   }
 }`}</CodeBlock>
         </Step>
 
-        <Step n={7} title="Cursor 재시작 후 연결 확인">
+        <Step n={3} title="Cursor 재시작 후 연결 확인">
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ① Cursor를 완전히 종료하고 다시 실행합니다.
+            Cursor를 완전히 종료하고 다시 실행합니다.
           </p>
           <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ② 상단 메뉴 <strong>Cursor → Settings → MCP</strong> (또는 좌하단 톱니바퀴 → MCP)에서
-            memory-store 항목의 상태가 <strong style={{ color: "var(--success)" }}>● active</strong>인지 확인합니다.
+            상단 메뉴 <strong>Cursor → Settings → MCP</strong>에서
+            memory-store 상태가 <strong style={{ color: "var(--success)" }}>● active</strong>인지 확인합니다.
           </p>
-          <Tip>💡 Cursor의 Composer(채팅) 창에서 <em>&ldquo;내 취향 불러와줘&rdquo;</em>처럼 자연어로 기억을 요청해보세요.</Tip>
+          <Tip>💡 Cursor의 Composer(채팅) 창에서 <em>&ldquo;내 취향 불러와줘&rdquo;</em>라고 입력해 테스트해보세요.</Tip>
         </Step>
       </div>
     </>
