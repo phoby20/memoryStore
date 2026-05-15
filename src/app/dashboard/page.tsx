@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
 
 type Memory = {
@@ -40,6 +40,8 @@ export default function DashboardPage() {
   const [activeCategory, setActiveCategory] = useState("전체");
   const [submitting, setSubmitting] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const graphRef = useRef<HTMLDivElement>(null);
+  const [graphSize, setGraphSize] = useState({ w: 800, h: 560 });
 
   const fetchMemories = useCallback(async (q?: string) => {
     setLoading(true);
@@ -56,6 +58,17 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => { fetchMemories(); }, [fetchMemories]);
+
+  useEffect(() => {
+    const el = graphRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) setGraphSize({ w: width, h: height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => fetchMemories(search || undefined), 300);
@@ -114,17 +127,26 @@ export default function DashboardPage() {
 
   const selectedMemory = memories.find((m) => m.id === selectedId) ?? null;
 
-  // Neural graph node positions
-  const nodes = useMemo(() =>
-    memories.slice(0, 18).map((m, i) => {
-      const angle = (i / Math.max(memories.length, 1)) * Math.PI * 2 - Math.PI / 2;
-      const ring = 155 + (i % 2) * 55;
+  // Neural graph node positions — scale to container size and node count
+  const nodes = useMemo(() => {
+    const n = memories.length;
+    const cx = graphSize.w / 2;
+    const cy = graphSize.h / 2;
+    const minDim = Math.min(graphSize.w, graphSize.h);
+    // Spread nodes more when few, tighter when many
+    const spread = n <= 3 ? 0.40 : n <= 7 ? 0.34 : 0.28;
+    const ring1 = minDim * spread;
+    const ring2 = minDim * (spread + 0.09);
+    return memories.slice(0, 18).map((m, i) => {
+      const angle = (i / Math.max(n, 1)) * Math.PI * 2 - Math.PI / 2;
+      const ring = i % 2 === 0 ? ring1 : ring2;
       return {
         ...m,
-        x: 400 + Math.cos(angle) * ring,
-        y: 280 + Math.sin(angle) * ring * 0.72,
+        x: cx + Math.cos(angle) * ring,
+        y: cy + Math.sin(angle) * ring * 0.74,
       };
-    }), [memories]);
+    });
+  }, [memories, graphSize]);
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--paper-1)" }}>
@@ -269,7 +291,7 @@ export default function DashboardPage() {
           {view === "graph" ? (
             <>
               {/* Graph canvas */}
-              <div style={{
+              <div ref={graphRef} style={{
                 flex: 1,
                 background: "var(--paper-0)",
                 border: "1px solid var(--paper-line)",
@@ -289,21 +311,22 @@ export default function DashboardPage() {
                     <p style={{ fontSize: 13, color: "var(--ink-4)", margin: 0 }}>+ 추가 버튼을 눌러 첫 번째 기억을 저장하세요</p>
                   </div>
                 ) : (
-                  <svg viewBox="0 0 800 560" style={{ width: "100%", height: "100%", display: "block" }}>
+                  <svg viewBox={`0 0 ${graphSize.w} ${graphSize.h}`} style={{ width: "100%", height: "100%", display: "block" }}>
                     <defs>
                       <pattern id="dot-grid" width="24" height="24" patternUnits="userSpaceOnUse">
                         <circle cx="12" cy="12" r="0.6" fill="var(--paper-line)" opacity="0.6" />
                       </pattern>
                     </defs>
-                    <rect width="800" height="560" fill="url(#dot-grid)" />
+                    <rect width={graphSize.w} height={graphSize.h} fill="url(#dot-grid)" />
 
                     {/* center to each node */}
                     {nodes.map((n) => {
-                      const mx = (400 + n.x) / 2 + Math.sin(n.x * 0.3) * 4;
-                      const my = (280 + n.y) / 2 + Math.cos(n.y * 0.3) * 4;
+                      const cx = graphSize.w / 2, cy = graphSize.h / 2;
+                      const mx = (cx + n.x) / 2 + Math.sin(n.x * 0.3) * 4;
+                      const my = (cy + n.y) / 2 + Math.cos(n.y * 0.3) * 4;
                       return (
                         <path key={"l" + n.id}
-                          d={`M 400 280 Q ${mx} ${my} ${n.x} ${n.y}`}
+                          d={`M ${cx} ${cy} Q ${mx} ${my} ${n.x} ${n.y}`}
                           fill="none" stroke="var(--ink-3)" strokeWidth="0.8"
                           opacity={selectedId === n.id ? 0.85 : 0.3} strokeLinecap="round"
                         />
@@ -327,15 +350,15 @@ export default function DashboardPage() {
                     })}
 
                     {/* center self node */}
-                    <circle cx="400" cy="280" r="32" fill="var(--glow)" opacity="0.08" />
-                    <circle cx="400" cy="280" r="20" fill="var(--glow)" opacity="0.18" />
-                    <circle cx="400" cy="280" r="12" fill="var(--glow)" stroke="var(--ink-2)" strokeWidth="1">
+                    <circle cx={graphSize.w / 2} cy={graphSize.h / 2} r="32" fill="var(--glow)" opacity="0.08" />
+                    <circle cx={graphSize.w / 2} cy={graphSize.h / 2} r="20" fill="var(--glow)" opacity="0.18" />
+                    <circle cx={graphSize.w / 2} cy={graphSize.h / 2} r="12" fill="var(--glow)" stroke="var(--ink-2)" strokeWidth="1">
                       <animate attributeName="r" values="12;13.5;12" dur="3.5s" repeatCount="indefinite" />
                     </circle>
-                    <text x="400" y="258" textAnchor="middle" fontSize="12" fill="var(--ink-1)" fontFamily="var(--font-serif)" fontStyle="italic" fontWeight="600">나</text>
+                    <text x={graphSize.w / 2} y={graphSize.h / 2 - 22} textAnchor="middle" fontSize="12" fill="var(--ink-1)" fontFamily="var(--font-serif)" fontStyle="italic" fontWeight="600">나</text>
 
                     {/* legend */}
-                    <g transform="translate(16, 440)">
+                    <g transform={`translate(16, ${graphSize.h - 120})`}>
                       <rect width="160" height="104" fill="var(--paper-1)" rx="6" stroke="var(--paper-line)" strokeWidth="0.6" />
                       <text x="12" y="18" fontSize="9" fill="var(--ink-4)" fontFamily="var(--font-mono)">CATEGORIES</text>
                       {Object.entries(CATEGORY_COLORS).slice(0, 5).map(([name, color], i) => (
