@@ -39,6 +39,7 @@ export default function DashboardPage() {
   const [editValue, setEditValue] = useState("");
   const [activeCategory, setActiveCategory] = useState("전체");
   const [submitting, setSubmitting] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
   const fetchMemories = useCallback(async (q?: string) => {
     setLoading(true);
@@ -64,15 +65,23 @@ export default function DashboardPage() {
   async function handleAdd() {
     if (!form.key.trim() || !form.value.trim() || submitting) return;
     setSubmitting(true);
+    setAddError(null);
     try {
-      await fetch("/api/memories", {
+      const res = await fetch("/api/memories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setAddError(data.error ?? "저장에 실패했습니다. 다시 시도해주세요.");
+        return;
+      }
       setForm({ category: "취향", key: "", value: "" });
       setShowAdd(false);
       fetchMemories(search || undefined);
+    } catch {
+      setAddError("네트워크 오류가 발생했습니다.");
     } finally {
       setSubmitting(false);
     }
@@ -243,8 +252,13 @@ export default function DashboardPage() {
                 />
               </div>
             </div>
+            {addError && (
+              <div style={{ marginBottom: 10, padding: "8px 12px", background: "rgba(177,75,62,0.08)", border: "1px solid rgba(177,75,62,0.25)", borderRadius: 6, fontSize: 12, color: "var(--danger)" }}>
+                {addError}
+              </div>
+            )}
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <button onClick={() => setShowAdd(false)} style={{ padding: "8px 16px", background: "transparent", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", cursor: "pointer" }}>취소</button>
+              <button onClick={() => { setShowAdd(false); setAddError(null); }} style={{ padding: "8px 16px", background: "transparent", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", cursor: "pointer" }}>취소</button>
               <button onClick={handleAdd} disabled={submitting} style={{ padding: "8px 18px", background: "var(--glow)", border: "1px solid var(--glow)", borderRadius: 6, fontSize: 13, color: "var(--paper-0)", fontWeight: 500, cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.6 : 1 }}>{submitting ? "저장 중…" : "저장"}</button>
             </div>
           </div>

@@ -56,6 +56,11 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
+      - name: Apply DB schema
+        run: DATABASE_URL="${{ secrets.DATABASE_URL }}" npx prisma db push --skip-generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Build
         run: npx vercel build --prod
         env:

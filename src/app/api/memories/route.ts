@@ -23,7 +23,8 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ memories });
-  } catch {
+  } catch (e) {
+    console.error("[GET /api/memories]", e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -62,7 +63,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ memory }, { status: 201 });
-  } catch {
+  } catch (e) {
+    console.error("[POST /api/memories]", e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
