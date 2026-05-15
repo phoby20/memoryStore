@@ -99,7 +99,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Tab strip */}
-        <div style={{ display: "flex", gap: 4, marginTop: 24, marginBottom: 28, borderBottom: "1px solid var(--paper-line)" }}>
+        <div className="settings-tabs" style={{ display: "flex", gap: 4, marginTop: 24, marginBottom: 28, borderBottom: "1px solid var(--paper-line)", overflowX: "auto" }}>
           {tabs.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
               padding: "10px 18px",
