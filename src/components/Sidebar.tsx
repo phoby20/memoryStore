@@ -7,8 +7,9 @@ import Logo from "./Logo";
 import { useTheme } from "./ThemeProvider";
 
 const items = [
+  { id: "chat", label: "채팅", icon: "💬", href: "/chat" },
   { id: "dashboard", label: "기억 지도", icon: "◉", href: "/dashboard" },
-  { id: "settings", label: "설정 & API 키", icon: "⚙", href: "/settings" },
+  { id: "settings", label: "설정", icon: "⚙", href: "/settings" },
 ];
 
 function SunIcon() {

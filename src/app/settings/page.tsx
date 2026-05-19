@@ -5,64 +5,14 @@ import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 
-type ApiKey = {
-  id: string;
-  name: string;
-  keyPreview: string;
-  createdAt: string;
-};
-
-type Tab = "apikeys" | "connect" | "account";
+type Tab = "aikeys" | "account";
 
 export default function SettingsPage() {
-  const [tab, setTab] = useState<Tab>("apikeys");
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-  const [newKeyName, setNewKeyName] = useState("");
-  const [newlyCreated, setNewlyCreated] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<Tab>("aikeys");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { signOut } = useClerk();
   const router = useRouter();
-
-  async function fetchKeys() {
-    const res = await fetch("/api/apikeys");
-    if (res.ok) {
-      const data = await res.json();
-      setApiKeys(data.keys);
-    }
-    setLoading(false);
-  }
-
-  useEffect(() => { fetchKeys(); }, []);
-
-  async function handleCreate() {
-    if (!newKeyName.trim()) return;
-    const res = await fetch("/api/apikeys", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newKeyName.trim() }),
-    });
-    const data = await res.json();
-    if (data.apiKey) {
-      setNewlyCreated(data.apiKey.key);
-      setNewKeyName("");
-      fetchKeys();
-    }
-  }
-
-  async function handleDeleteKey(id: string) {
-    await fetch(`/api/apikeys?id=${id}`, { method: "DELETE" });
-    setApiKeys((prev) => prev.filter((k) => k.id !== id));
-    if (newlyCreated) setNewlyCreated(null);
-  }
-
-  function copyKey(key: string) {
-    navigator.clipboard.writeText(key);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
 
   async function handleDeleteAccount() {
     setDeleting(true);
@@ -79,8 +29,7 @@ export default function SettingsPage() {
   }
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: "apikeys", label: "API 키" },
-    { id: "connect", label: "연결 방법" },
+    { id: "aikeys", label: "AI 설정" },
     { id: "account", label: "계정 & 개인정보" },
   ];
 
@@ -115,97 +64,8 @@ export default function SettingsPage() {
           ))}
         </div>
 
-        {/* API 키 탭 */}
-        {tab === "apikeys" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0, maxWidth: 580 }}>
-              AI 채팅 서비스의 MCP 설정에 이 키를 등록하면, 그 서비스가 당신의 기억을 안전하게 읽고 쓸 수 있게 됩니다.
-            </p>
-
-            {/* Generate panel */}
-            <div style={{ background: "var(--paper-0)", border: "1px solid var(--paper-line)", borderRadius: 12, padding: 24 }}>
-              <p style={{ fontFamily: "var(--font-serif)", fontSize: 16, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 6px" }}>새 키 발급</p>
-              <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 16px" }}>연결할 AI 서비스마다 고유한 키를 발급하시는 것을 권장합니다.</p>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <input
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-                  placeholder="키 이름 (예: Claude Desktop)"
-                  maxLength={50}
-                  style={{
-                    flex: 1, minWidth: 0, padding: "10px 14px",
-                    background: "var(--paper-1)", border: "1px solid var(--paper-line)",
-                    borderRadius: 8, fontSize: 13, color: "var(--ink-1)", outline: "none",
-                  }}
-                />
-                <button onClick={handleCreate} style={{
-                  padding: "10px 20px",
-                  background: "var(--glow)", border: "1px solid var(--glow)",
-                  color: "var(--paper-0)", borderRadius: 8, fontSize: 13, fontWeight: 500,
-                  cursor: "pointer", whiteSpace: "nowrap",
-                }}>
-                  + 발급
-                </button>
-              </div>
-            </div>
-
-            {/* New key display */}
-            {newlyCreated && (
-              <div style={{ background: "rgba(107,142,90,0.08)", border: "1px solid rgba(107,142,90,0.3)", borderRadius: 12, padding: 20 }}>
-                <p style={{ color: "var(--success)", fontSize: 13, fontWeight: 600, margin: "0 0 10px" }}>✓ 새 API 키가 발급됐습니다</p>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                  <code style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--ink-2)", background: "var(--paper-2)", padding: "6px 10px", borderRadius: 5, flex: 1, wordBreak: "break-all" }}>
-                    {newlyCreated}
-                  </code>
-                  <button onClick={() => copyKey(newlyCreated)} style={{
-                    padding: "6px 14px", background: "var(--paper-2)", border: "1px solid var(--paper-line)",
-                    borderRadius: 6, fontSize: 12, color: "var(--ink-2)", cursor: "pointer", whiteSpace: "nowrap",
-                  }}>
-                    {copied ? "✓ 복사됨" : "복사"}
-                  </button>
-                </div>
-                <p style={{ fontSize: 12, color: "var(--warn)", margin: 0 }}>⚠ 지금만 표시됩니다. 반드시 복사해서 보관하세요.</p>
-              </div>
-            )}
-
-            {/* Key list */}
-            {loading ? (
-              <p style={{ color: "var(--ink-4)", fontSize: 13, fontStyle: "italic" }}>불러오는 중…</p>
-            ) : apiKeys.length === 0 ? (
-              <p style={{ color: "var(--ink-4)", fontSize: 13, fontFamily: "var(--font-serif)", fontStyle: "italic" }}>발급된 API 키가 없습니다.</p>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {apiKeys.map((key) => (
-                  <div key={key.id} style={{
-                    background: "var(--paper-0)", border: "1px solid var(--paper-line)",
-                    borderRadius: 10, padding: "16px 20px",
-                    display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap",
-                  }}>
-                    <div style={{ width: 4, height: 36, background: "var(--glow)", borderRadius: 999, flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontFamily: "var(--font-serif)", fontSize: 15, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 4px" }}>{key.name}</p>
-                      <p style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--ink-4)", margin: 0 }}>{key.keyPreview}</p>
-                    </div>
-                    <p style={{ fontSize: 11, color: "var(--ink-5)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
-                      {new Date(key.createdAt).toLocaleDateString("ko-KR")}
-                    </p>
-                    <button onClick={() => handleDeleteKey(key.id)} style={{
-                      padding: "6px 12px", background: "transparent",
-                      border: "1px solid rgba(177,75,62,0.25)", borderRadius: 6,
-                      color: "var(--danger)", fontSize: 12, cursor: "pointer",
-                    }}>
-                      폐기
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 연결 방법 탭 */}
-        {tab === "connect" && <ConnectGuide />}
+        {/* AI 설정 탭 */}
+        {tab === "aikeys" && <AiKeysTab />}
 
         {/* 계정 & 개인정보 탭 */}
         {tab === "account" && (
@@ -278,745 +138,134 @@ export default function SettingsPage() {
   );
 }
 
-// ── 연결 방법 가이드 ──────────────────────────────────────────────────────────
+// ── AI API 키 설정 ────────────────────────────────────────────────────────────
 
-type ServiceId = "claude-desktop" | "claude-code" | "gemini-cli" | "vscode-copilot" | "cursor" | "chatgpt" | "rest-api";
+type AiKeyRecord = { id: string; provider: string; maskedKey: string; updatedAt: string };
 
-const SERVICES: { id: ServiceId; glyph: string; name: string; badge: string; free?: boolean; desc: string }[] = [
-  { id: "claude-desktop", glyph: "✦", name: "Claude Desktop",  badge: "MCP",  free: true,  desc: "Anthropic Claude 데스크탑 앱 (무료 계정 가능)" },
-  { id: "gemini-cli",     glyph: "◆", name: "Gemini CLI",      badge: "MCP",  free: true,  desc: "Google Gemini CLI — 완전 무료" },
-  { id: "claude-code",    glyph: "✦", name: "Claude Code",     badge: "MCP",               desc: "터미널용 Claude CLI" },
-  { id: "vscode-copilot", glyph: "○", name: "VS Code Copilot", badge: "MCP",               desc: "GitHub Copilot Chat (VS Code)" },
-  { id: "cursor",         glyph: "◈", name: "Cursor",          badge: "MCP",               desc: "AI 코드 에디터 Cursor" },
-  { id: "chatgpt",        glyph: "◇", name: "ChatGPT",         badge: "REST",              desc: "OpenAI Custom GPT Actions (Plus 이상)" },
-  { id: "rest-api",       glyph: "△", name: "REST API",        badge: "API",               desc: "직접 통합 · 개발자용" },
+const AI_PROVIDERS = [
+  { id: "claude", label: "Claude (Anthropic)", hint: "sk-ant-api03-…", link: "https://console.anthropic.com/settings/keys" },
+  { id: "openai", label: "OpenAI (GPT-4o, o3…)", hint: "sk-proj-…", link: "https://platform.openai.com/api-keys" },
+  { id: "gemini", label: "Gemini (Google AI)", hint: "AIza…", link: "https://aistudio.google.com/apikey" },
 ];
 
-function CodeBlock({ children, label }: { children: string; label?: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <div style={{ position: "relative", marginTop: 10, maxWidth: "100%", minWidth: 0 }}>
-      {label && (
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-4)", marginBottom: 4 }}>{label}</div>
-      )}
-      <pre style={{
-        fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--ink-2)",
-        background: "var(--paper-2)", border: "1px solid var(--paper-line)",
-        borderRadius: 8, padding: "14px 16px", margin: 0,
-        overflowX: "auto", lineHeight: 1.65, whiteSpace: "pre",
-        maxWidth: "100%",
-      }}>{children}</pre>
-      <button
-        onClick={() => { navigator.clipboard.writeText(children); setCopied(true); setTimeout(() => setCopied(false), 1800); }}
-        style={{
-          position: "absolute", top: label ? 30 : 8, right: 8,
-          padding: "3px 10px", background: "var(--paper-0)",
-          border: "1px solid var(--paper-line)", borderRadius: 5,
-          fontSize: 11, color: copied ? "var(--success)" : "var(--ink-4)", cursor: "pointer",
-        }}
-      >
-        {copied ? "✓" : "복사"}
-      </button>
-    </div>
-  );
-}
+function AiKeysTab() {
+  const [records, setRecords] = useState<AiKeyRecord[]>([]);
+  const [inputKey, setInputKey] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState<Record<string, boolean>>({});
+  const [saved, setSaved] = useState<Record<string, boolean>>({});
 
-function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ display: "flex", gap: 16, paddingBottom: 24, borderBottom: "1px dashed var(--paper-line)" }}>
-      <div style={{
-        width: 28, height: 28, borderRadius: "50%",
-        background: "var(--glow)", color: "var(--paper-0)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700,
-        flexShrink: 0, marginTop: 1,
-      }}>{n}</div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 15, fontWeight: 700, color: "var(--ink-1)", margin: "0 0 10px" }}>{title}</p>
-        {children}
-      </div>
-    </div>
-  );
-}
+  useEffect(() => {
+    fetch("/api/ai-apikeys").then((r) => r.json()).then((data) => {
+      if (Array.isArray(data)) setRecords(data);
+    });
+  }, []);
 
-function Note({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{
-      marginTop: 10, padding: "10px 14px",
-      background: "rgba(201,123,74,0.07)", border: "1px solid rgba(201,123,74,0.2)",
-      borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7,
-    }}>{children}</div>
-  );
-}
+  function getRecord(provider: string) {
+    return records.find((r) => r.provider === provider);
+  }
 
-function Tip({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{
-      marginTop: 10, padding: "10px 14px",
-      background: "rgba(107,142,90,0.07)", border: "1px solid rgba(107,142,90,0.2)",
-      borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7,
-    }}>{children}</div>
-  );
-}
+  async function handleSave(provider: string) {
+    const key = inputKey[provider]?.trim();
+    if (!key) return;
+    setSaving((p) => ({ ...p, [provider]: true }));
+    const res = await fetch("/api/ai-apikeys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider, apiKey: key }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setRecords((prev) => {
+        const next = prev.filter((r) => r.provider !== provider);
+        return [...next, { id: data.id, provider: data.provider, maskedKey: "••••••••" + key.slice(-4), updatedAt: new Date().toISOString() }];
+      });
+      setInputKey((p) => ({ ...p, [provider]: "" }));
+      setSaved((p) => ({ ...p, [provider]: true }));
+      setTimeout(() => setSaved((p) => ({ ...p, [provider]: false })), 2000);
+    }
+    setSaving((p) => ({ ...p, [provider]: false }));
+  }
 
-function Inline({ children }: { children: React.ReactNode }) {
-  return (
-    <code style={{ fontFamily: "var(--font-mono)", fontSize: 12, background: "var(--paper-2)", padding: "1px 6px", borderRadius: 3 }}>
-      {children}
-    </code>
-  );
-}
-
-function ConnectGuide() {
-  const [selected, setSelected] = useState<ServiceId>("claude-desktop");
-  const [serviceUrl, setServiceUrl] = useState("https://your-memory-store-url.com");
-  useEffect(() => { setServiceUrl(window.location.origin); }, []);
+  async function handleDelete(provider: string) {
+    await fetch("/api/ai-apikeys", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider }),
+    });
+    setRecords((prev) => prev.filter((r) => r.provider !== provider));
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {/* 무료 안내 배너 */}
-      <div style={{
-        display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 16px",
-        background: "rgba(107,142,90,0.08)", border: "1px solid rgba(107,142,90,0.25)",
-        borderRadius: 8, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.6,
-      }}>
-        <span style={{ color: "var(--success)", fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓ 무료 시작</span>
-        <span>
-          Node.js 설치 없이 <strong style={{ color: "var(--ink-1)" }}>URL + API 키</strong>만으로 연결됩니다.
-          시작 전에 <strong style={{ color: "var(--ink-1)" }}>API 키</strong> 탭에서 키를 먼저 발급해 두세요.
-        </span>
-      </div>
+      <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0, maxWidth: 580, lineHeight: 1.7 }}>
+        AI 채팅을 사용하려면 사용하려는 AI 서비스의 API 키를 등록하세요.
+        키는 서버에서 AES-256 암호화되어 저장되며, 채팅 요청 시에만 복호화됩니다.
+      </p>
 
-      {/* Service selector */}
-      <div className="connect-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
-        {SERVICES.map((s) => (
-          <button key={s.id} onClick={() => setSelected(s.id)} style={{
-            padding: "12px 14px",
-            background: selected === s.id ? "var(--paper-0)" : "var(--paper-2)",
-            border: selected === s.id ? "1px solid var(--glow)" : "1px solid var(--paper-line)",
-            borderRadius: 10, textAlign: "left", cursor: "pointer",
-            boxShadow: selected === s.id ? "var(--shadow-1)" : "none",
-            transition: "all 0.15s", position: "relative",
+      {AI_PROVIDERS.map((prov) => {
+        const rec = getRecord(prov.id);
+        return (
+          <div key={prov.id} style={{
+            background: "var(--paper-0)", border: "1px solid var(--paper-line)",
+            borderRadius: 12, padding: 24,
           }}>
-            {s.free && (
-              <span style={{
-                position: "absolute", top: 8, right: 8,
-                fontSize: 9, fontFamily: "var(--font-mono)", fontWeight: 700,
-                padding: "1px 5px", borderRadius: 3,
-                background: "rgba(107,142,90,0.15)", color: "var(--success)",
-              }}>FREE</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <p style={{ fontFamily: "var(--font-serif)", fontSize: 16, fontWeight: 600, color: "var(--ink-1)", margin: 0 }}>
+                {prov.label}
+              </p>
+              {rec && (
+                <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 4, background: "rgba(107,142,90,0.15)", color: "var(--success)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+                  ✓ 등록됨
+                </span>
+              )}
+            </div>
+
+            {rec && (
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "10px 14px", background: "var(--paper-1)", borderRadius: 8, border: "1px solid var(--paper-line)" }}>
+                <code style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--ink-3)", flex: 1 }}>{rec.maskedKey}</code>
+                <span style={{ fontSize: 11, color: "var(--ink-5)", whiteSpace: "nowrap" }}>
+                  {new Date(rec.updatedAt).toLocaleDateString("ko-KR")} 업데이트
+                </span>
+                <button onClick={() => handleDelete(prov.id)} style={{
+                  padding: "4px 10px", background: "transparent",
+                  border: "1px solid rgba(177,75,62,0.3)", borderRadius: 5,
+                  color: "var(--danger)", fontSize: 12, cursor: "pointer",
+                }}>삭제</button>
+              </div>
             )}
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
-              <span style={{ fontSize: 14, color: "var(--sepia-deep)" }}>{s.glyph}</span>
-              <span style={{
-                fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 600,
-                padding: "1px 5px", borderRadius: 3,
-                background: s.badge === "MCP" ? "rgba(201,123,74,0.12)" : s.badge === "REST" ? "rgba(107,142,90,0.12)" : "rgba(139,111,71,0.12)",
-                color: s.badge === "MCP" ? "var(--glow-deep)" : s.badge === "REST" ? "var(--success)" : "var(--sepia)",
-              }}>{s.badge}</span>
-            </div>
-            <p style={{ fontFamily: "var(--font-serif)", fontSize: 13, fontWeight: 600, color: selected === s.id ? "var(--ink-1)" : "var(--ink-2)", margin: "0 0 3px" }}>{s.name}</p>
-            <p style={{ fontSize: 10, color: "var(--ink-4)", margin: 0, lineHeight: 1.4 }}>{s.desc}</p>
-          </button>
-        ))}
-      </div>
 
-      {/* Guide */}
-      <div style={{ background: "var(--paper-0)", border: "1px solid var(--paper-line)", borderRadius: 12, padding: 28 }}>
-        {selected === "claude-desktop" && <GuideClaudeDesktop serviceUrl={serviceUrl} />}
-        {selected === "claude-code"    && <GuideClaudeCode serviceUrl={serviceUrl} />}
-        {selected === "gemini-cli"     && <GuideGeminiCli serviceUrl={serviceUrl} />}
-        {selected === "vscode-copilot" && <GuideVSCodeCopilot serviceUrl={serviceUrl} />}
-        {selected === "cursor"         && <GuideCursor serviceUrl={serviceUrl} />}
-        {selected === "chatgpt"        && <GuideChatGPT serviceUrl={serviceUrl} />}
-        {selected === "rest-api"       && <GuideRestApi serviceUrl={serviceUrl} />}
-      </div>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <input
+                type="password"
+                value={inputKey[prov.id] ?? ""}
+                onChange={(e) => setInputKey((p) => ({ ...p, [prov.id]: e.target.value }))}
+                onKeyDown={(e) => e.key === "Enter" && handleSave(prov.id)}
+                placeholder={prov.hint || "API 키 입력"}
+                style={{
+                  flex: 1, minWidth: 0, padding: "10px 14px",
+                  background: "var(--paper-1)", border: "1px solid var(--paper-line)",
+                  borderRadius: 8, fontSize: 13, color: "var(--ink-1)", outline: "none",
+                }}
+              />
+              <button onClick={() => handleSave(prov.id)} disabled={saving[prov.id] || !inputKey[prov.id]?.trim()} style={{
+                padding: "10px 20px",
+                background: saved[prov.id] ? "var(--success)" : "var(--glow)",
+                border: "none", color: "var(--paper-0)", borderRadius: 8,
+                fontSize: 13, fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap",
+                opacity: (!inputKey[prov.id]?.trim() || saving[prov.id]) ? 0.5 : 1,
+              }}>
+                {saved[prov.id] ? "✓ 저장됨" : saving[prov.id] ? "저장 중…" : rec ? "교체" : "저장"}
+              </button>
+            </div>
+
+            {prov.link && (
+              <p style={{ fontSize: 12, color: "var(--ink-4)", margin: "8px 0 0" }}>
+                API 키 발급: <a href={prov.link} target="_blank" rel="noreferrer" style={{ color: "var(--glow-deep)" }}>{prov.link}</a>
+              </p>
+            )}
+          </div>
+        );
+      })}
     </div>
-  );
-}
-
-// ── 공통 MCP 서버 준비 안내 ──────────────────────────────────────────────────
-
-function McpServerPrepSection({ serviceUrl }: { serviceUrl: string }) {
-  return (
-    <>
-      <Step n={1} title="API 키 준비">
-        <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-          위의 <strong>API 키</strong> 탭을 클릭해서 새 키를 발급하고, 복사해 두세요.
-          발급 직후에만 전체 키를 볼 수 있습니다.
-        </p>
-        <Tip>💡 서비스별로 키를 별도로 발급하면, 나중에 특정 서비스만 차단하기 쉽습니다. (예: &ldquo;Claude Desktop용 키&rdquo;)</Tip>
-      </Step>
-
-      <Step n={2} title="Node.js 설치 — 처음이라면 필수">
-        <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-          Node.js는 Memory Store와 AI를 연결해주는 중간 프로그램(MCP 서버)을 실행하기 위해 반드시 필요합니다.
-          이미 설치되어 있다면 이 단계를 건너뛰어도 됩니다.
-        </p>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "0 0 4px" }}>① 아래 사이트에 접속해 LTS 버전을 다운로드합니다.</p>
-        <div style={{ background: "var(--paper-2)", border: "1px solid var(--paper-line)", borderRadius: 6, padding: "10px 14px", fontSize: 13, margin: "4px 0 10px" }}>
-          🌐 <a href="https://nodejs.org" target="_blank" rel="noreferrer" style={{ color: "var(--glow-deep)", fontWeight: 600 }}>nodejs.org</a>
-          <span style={{ color: "var(--ink-4)", marginLeft: 8 }}>→ &ldquo;LTS&rdquo; 버튼 클릭 → 설치 파일 다운로드</span>
-        </div>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "0 0 4px" }}>② 다운로드한 파일을 실행해 설치를 완료합니다.</p>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "8px 0 4px" }}>③ 설치 확인 — 터미널에서 아래 명령을 실행해 버전 번호가 나오면 성공입니다.</p>
-        <CodeBlock label="터미널">{`node --version`}</CodeBlock>
-        <Note>
-          ⓘ <strong>터미널이란?</strong> 컴퓨터에 텍스트 명령을 입력하는 프로그램입니다.<br />
-          • <strong>Mac:</strong> Spotlight 검색(⌘+Space) → &ldquo;터미널&rdquo; 입력 → Enter<br />
-          • <strong>Windows:</strong> 시작 버튼 → &ldquo;PowerShell&rdquo; 검색 → 클릭
-        </Note>
-      </Step>
-
-      <Step n={3} title="MCP 서버 파일 다운로드">
-        <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-          MCP 서버는 Memory Store와 AI 앱 사이에서 데이터를 주고받는 작은 프로그램입니다.
-          아래 GitHub 저장소에서 다운로드합니다.
-        </p>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "0 0 4px" }}>① GitHub에 접속합니다.</p>
-        <div style={{ background: "var(--paper-2)", border: "1px solid var(--paper-line)", borderRadius: 6, padding: "10px 14px", fontSize: 13, margin: "4px 0 10px" }}>
-          🌐 <a href="https://github.com/phoby20/memoryStore" target="_blank" rel="noreferrer" style={{ color: "var(--glow-deep)", fontWeight: 600 }}>github.com/phoby20/memoryStore</a>
-        </div>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "0 0 4px" }}>② 초록색 <strong>Code</strong> 버튼 클릭 → <strong>Download ZIP</strong> 클릭</p>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "8px 0 4px" }}>③ 다운로드된 ZIP 파일의 압축을 풀고, 폴더를 <strong>영구적인 위치</strong>로 이동합니다.</p>
-        <Tip>
-          💡 <strong>Documents(문서) 폴더 안에 보관하길 권장합니다.</strong><br />
-          나중에 폴더를 옮기면 연결이 끊기므로 처음부터 고정된 위치에 두세요.<br />
-          예시 경로 (Mac): <Inline>/Users/사용자이름/Documents/memoryStore-main</Inline>
-        </Tip>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "10px 0 4px" }}>④ 압축 해제된 폴더 안의 <Inline>mcp-server</Inline> 폴더를 확인합니다.</p>
-      </Step>
-
-      <Step n={4} title="MCP 서버 의존성 설치">
-        <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-          MCP 서버가 동작하는 데 필요한 추가 파일들을 설치합니다. 한 번만 하면 됩니다.
-        </p>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "0 0 4px" }}>① 터미널을 열고 아래 명령을 입력합니다.</p>
-        <Note>
-          ⓘ <strong>mcp-server 폴더 경로를 찾는 방법</strong><br />
-          • <strong>Mac:</strong> Finder에서 <Inline>mcp-server</Inline> 폴더를 터미널 창으로 <strong>드래그</strong>하면 경로가 자동으로 입력됩니다.<br />
-          • <strong>Windows:</strong> mcp-server 폴더를 Shift+마우스 우클릭 → &ldquo;경로로 복사&rdquo;
-        </Note>
-        <CodeBlock label="터미널 — mcp-server 폴더로 이동">{`cd /Users/사용자이름/Documents/memoryStore-main/mcp-server`}</CodeBlock>
-        <p style={{ fontSize: 12, color: "var(--ink-4)", margin: "6px 0 4px" }}>위 경로는 예시입니다. 실제 경로로 바꿔 입력하세요.</p>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "10px 0 4px" }}>② 이어서 아래 명령을 실행합니다. (인터넷 연결 필요, 1~2분 소요)</p>
-        <CodeBlock label="터미널">{`npm install`}</CodeBlock>
-        <Tip>💡 &ldquo;added XX packages&rdquo; 라고 나오면 성공입니다.</Tip>
-      </Step>
-
-      <Step n={5} title="mcp-server/index.js 의 전체 경로 확인">
-        <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-          다음 단계에서 설정 파일에 이 파일의 <strong>전체 경로</strong>를 입력해야 합니다. 아래 방법으로 미리 확인해 두세요.
-        </p>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "0 0 4px" }}>• Mac — 터미널에서 아래 명령을 실행하면 경로가 출력됩니다.</p>
-        <CodeBlock label="터미널 (mcp-server 폴더 안에서 실행)">{`echo "$(pwd)/index.js"`}</CodeBlock>
-        <p style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600, margin: "10px 0 4px" }}>• Windows — PowerShell에서 실행합니다.</p>
-        <CodeBlock label="PowerShell (mcp-server 폴더 안에서 실행)">{`echo "$((Get-Location).Path)\\index.js"`}</CodeBlock>
-        <p style={{ fontSize: 12, color: "var(--ink-4)", marginTop: 8 }}>
-          출력된 경로(예: <Inline>/Users/홍길동/Documents/memoryStore-main/mcp-server/index.js</Inline>)를 복사해 두세요.
-        </p>
-      </Step>
-    </>
-  );
-}
-
-// ── Claude Desktop ────────────────────────────────────────────────────────────
-
-function GuideClaudeDesktop({ serviceUrl }: { serviceUrl: string }) {
-  return (
-    <>
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--ink-1)", margin: 0 }}>Claude Desktop 연결 가이드</h2>
-          <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "rgba(107,142,90,0.15)", color: "var(--success)" }}>무료 가능</span>
-        </div>
-        <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 10px", lineHeight: 1.7 }}>
-          Claude Desktop에 Memory Store를 연결하면, 평소처럼 Claude와 대화하는 것만으로 기억이 자동으로 저장되고 불러와집니다.
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 12, color: "var(--ink-4)", padding: "10px 14px", background: "var(--paper-2)", borderRadius: 6 }}>
-          <span>⏱ 예상 소요 시간: 약 2~3분</span>
-          <span>💻 필요 환경: Mac 또는 Windows PC</span>
-          <span>💰 비용: 무료 (Claude 계정 필요)</span>
-        </div>
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <Step n={1} title="Claude Desktop 앱 설치">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            아직 Claude Desktop이 없다면 먼저 설치합니다. 이미 설치되어 있으면 건너뛰세요.
-          </p>
-          <div style={{ background: "var(--paper-2)", border: "1px solid var(--paper-line)", borderRadius: 6, padding: "10px 14px", fontSize: 13, margin: "4px 0 10px" }}>
-            🌐 <a href="https://claude.ai/download" target="_blank" rel="noreferrer" style={{ color: "var(--glow-deep)", fontWeight: 600 }}>claude.ai/download</a>
-            <span style={{ color: "var(--ink-4)", marginLeft: 8 }}>→ 운영체제에 맞는 버전 다운로드 → 설치 후 로그인</span>
-          </div>
-        </Step>
-
-        <Step n={2} title="API 키 발급">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            위의 <strong>API 키</strong> 탭을 클릭해 새 키를 발급하고 복사해 두세요.
-          </p>
-          <Tip>💡 서비스별로 키를 별도로 발급하면 나중에 특정 서비스만 차단할 수 있습니다. (예: &ldquo;Claude Desktop용 키&rdquo;)</Tip>
-        </Step>
-
-        <Step n={3} title="설정 파일 수정">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            아래 경로의 파일을 텍스트 편집기로 엽니다. 파일이 없으면 새로 만드세요.
-          </p>
-          <CodeBlock label="설정 파일 위치 — Mac">{`~/Library/Application Support/Claude/claude_desktop_config.json`}</CodeBlock>
-          <CodeBlock label="설정 파일 위치 — Windows">{`%APPDATA%\\Claude\\claude_desktop_config.json`}</CodeBlock>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "10px 0 6px", lineHeight: 1.7 }}>
-            파일 내용 전체를 아래 내용으로 바꿉니다. <strong>API 키 한 곳</strong>만 수정하면 됩니다.
-          </p>
-          <CodeBlock label="claude_desktop_config.json">{`{
-  "mcpServers": {
-    "memory-store": {
-      "url": "${serviceUrl}/api/mcp",
-      "headers": {
-        "Authorization": "Bearer 여기에_API_키_입력"
-      }
-    }
-  }
-}`}</CodeBlock>
-          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
-            <div style={{ padding: "10px 14px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
-              <strong style={{ color: "var(--glow-deep)" }}>① url</strong> — 이미 올바르게 입력되어 있습니다. 수정 불필요.
-            </div>
-            <div style={{ padding: "10px 14px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
-              <strong style={{ color: "var(--glow-deep)" }}>② Authorization</strong> — <Inline>여기에_API_키_입력</Inline> 부분을 2단계에서 발급한 키로 교체합니다.
-            </div>
-          </div>
-          <Note>ⓘ 파일을 새로 만들 때: Mac은 TextEdit 앱을 열고 &ldquo;포맷 → 일반 텍스트 만들기&rdquo;를 먼저 클릭하세요. Windows는 메모장을 사용하세요.</Note>
-        </Step>
-
-        <Step n={4} title="Claude Desktop 재시작 및 연결 확인">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            설정 파일을 저장한 뒤 Claude Desktop을 <strong>완전히 종료</strong>하고 다시 실행합니다.
-          </p>
-          <Tip>
-            💡 채팅 입력창 하단에 🔧 아이콘 또는 <strong>memory-store</strong>가 표시되면 연결 성공입니다.<br />
-            <em style={{ color: "var(--ink-2)" }}>&ldquo;내 Memory Store에 저장된 기억을 불러와줘&rdquo;</em>라고 입력해 테스트해보세요.
-          </Tip>
-          <Note>
-            ⚠ <strong>연결이 안 된다면:</strong><br />
-            • url과 API 키에 오타가 없는지 확인 (복사·붙여넣기 권장)<br />
-            • Claude Desktop을 트레이 아이콘까지 완전히 종료했는지 확인<br />
-            • 파일 이름이 정확히 <Inline>claude_desktop_config.json</Inline>인지 확인
-          </Note>
-        </Step>
-      </div>
-    </>
-  );
-}
-
-// ── Gemini CLI ────────────────────────────────────────────────────────────────
-
-function GuideGeminiCli({ serviceUrl }: { serviceUrl: string }) {
-  return (
-    <>
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--ink-1)", margin: 0 }}>Gemini CLI 연결 가이드</h2>
-          <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "rgba(107,142,90,0.15)", color: "var(--success)" }}>완전 무료</span>
-        </div>
-        <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 10px", lineHeight: 1.7 }}>
-          Google의 무료 AI 도구입니다. Google 계정만 있으면 별도 결제 없이 터미널에서 Gemini를 사용할 수 있습니다.
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 12, color: "var(--ink-4)", padding: "10px 14px", background: "var(--paper-2)", borderRadius: 6 }}>
-          <span>⏱ 예상 소요 시간: 약 5분 (Gemini CLI 신규 설치 시 10분)</span>
-          <span>💰 비용: 완전 무료 (Google 계정 필요)</span>
-        </div>
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <Step n={1} title="Gemini CLI 설치 및 로그인">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            아직 Gemini CLI가 없다면 터미널에서 설치합니다. (Node.js 필요)
-          </p>
-          <CodeBlock label="터미널">{`npm install -g @google/gemini-cli`}</CodeBlock>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 4px", lineHeight: 1.7 }}>
-            설치 후 <Inline>gemini</Inline>를 실행하면 브라우저로 Google 계정 로그인을 요청합니다.
-          </p>
-        </Step>
-
-        <Step n={2} title="API 키 발급">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            위의 <strong>API 키</strong> 탭에서 새 키를 발급하고 복사해 두세요.
-          </p>
-          <Tip>💡 서비스별로 키를 별도로 발급하면 나중에 특정 서비스만 차단할 수 있습니다.</Tip>
-        </Step>
-
-        <Step n={3} title="설정 파일 수정">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            아래 경로의 파일을 텍스트 편집기로 엽니다. 파일이 없으면 새로 만드세요.
-          </p>
-          <CodeBlock label="설정 파일 위치 — Mac / Linux">{`~/.gemini/settings.json`}</CodeBlock>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 6px", lineHeight: 1.7 }}>
-            파일 내용 전체를 아래 내용으로 바꿉니다. <strong>API 키 한 곳</strong>만 수정하면 됩니다.
-          </p>
-          <CodeBlock label="~/.gemini/settings.json">{`{
-  "mcpServers": {
-    "memory-store": {
-      "url": "${serviceUrl}/api/mcp",
-      "headers": {
-        "Authorization": "Bearer 여기에_API_키_입력"
-      }
-    }
-  }
-}`}</CodeBlock>
-          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
-            <div style={{ padding: "10px 14px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
-              <strong style={{ color: "var(--glow-deep)" }}>① url</strong> — 이미 올바르게 입력되어 있습니다. 수정 불필요.
-            </div>
-            <div style={{ padding: "10px 14px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 6, fontSize: 13, color: "var(--ink-3)", lineHeight: 1.7 }}>
-              <strong style={{ color: "var(--glow-deep)" }}>② Authorization</strong> — <Inline>여기에_API_키_입력</Inline> 부분을 2단계에서 발급한 키로 교체합니다.
-            </div>
-          </div>
-        </Step>
-
-        <Step n={4} title="연결 확인">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            터미널에서 Gemini CLI를 다시 실행하고 테스트합니다.
-          </p>
-          <CodeBlock label="터미널">{`gemini`}</CodeBlock>
-          <CodeBlock>{`내 Memory Store에 저장된 기억을 불러와줘`}</CodeBlock>
-          <Tip>💡 <Inline>/mcp</Inline>를 입력하면 연결된 MCP 서버 목록을 확인할 수 있습니다.</Tip>
-        </Step>
-      </div>
-    </>
-  );
-}
-
-// ── Claude Code ───────────────────────────────────────────────────────────────
-
-function GuideClaudeCode({ serviceUrl }: { serviceUrl: string }) {
-  return (
-    <>
-      <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 6px" }}>Claude Code 연결 가이드</h2>
-      <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 20px", lineHeight: 1.7 }}>
-        터미널에서 사용하는 Claude Code CLI에 Memory Store를 연결합니다.
-      </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <Step n={1} title="API 키 발급">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0, lineHeight: 1.7 }}>
-            위의 <strong>API 키</strong> 탭에서 새 키를 발급하고 복사해 두세요.
-          </p>
-        </Step>
-
-        <Step n={2} title="Claude Code에 MCP 서버 등록">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            터미널에서 아래 명령을 실행합니다. API 키만 교체하면 됩니다.
-          </p>
-          <CodeBlock label="터미널">{`claude mcp add memory-store \\
-  --transport http \\
-  --url ${serviceUrl}/api/mcp \\
-  --header "Authorization: Bearer 여기에_API_키_입력"`}</CodeBlock>
-          <Tip>💡 등록 후 <Inline>claude mcp list</Inline>를 실행해 memory-store가 목록에 나오면 성공입니다.</Tip>
-        </Step>
-
-        <Step n={3} title="연결 확인">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            Claude Code 세션을 시작하고 슬래시 명령으로 확인합니다.
-          </p>
-          <CodeBlock label="터미널">{`claude`}</CodeBlock>
-          <p style={{ fontSize: 12, color: "var(--ink-4)", margin: "6px 0 4px" }}>세션 안에서:</p>
-          <CodeBlock>{`/mcp`}</CodeBlock>
-          <Tip>💡 <Inline>memory-store</Inline>가 목록에 표시되면 연결 완료입니다.</Tip>
-        </Step>
-      </div>
-    </>
-  );
-}
-
-// ── VS Code Copilot ───────────────────────────────────────────────────────────
-
-function GuideVSCodeCopilot({ serviceUrl }: { serviceUrl: string }) {
-  return (
-    <>
-      <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 6px" }}>VS Code Copilot 연결 가이드</h2>
-      <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 20px", lineHeight: 1.7 }}>
-        GitHub Copilot Chat의 Agent 모드에서 Memory Store를 사용합니다.
-        VS Code 1.99 이상, GitHub Copilot 구독이 필요합니다.
-      </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <Step n={1} title="API 키 발급">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0, lineHeight: 1.7 }}>
-            위의 <strong>API 키</strong> 탭에서 새 키를 발급하고 복사해 두세요.
-          </p>
-        </Step>
-
-        <Step n={2} title="VS Code 사용자 설정에 MCP 등록">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ① VS Code에서{" "}
-            <kbd style={{ fontFamily: "var(--font-mono)", fontSize: 11, background: "var(--paper-2)", padding: "2px 6px", borderRadius: 3, border: "1px solid var(--paper-line)" }}>⌘ Shift P</kbd>
-            {" "}(Windows: <kbd style={{ fontFamily: "var(--font-mono)", fontSize: 11, background: "var(--paper-2)", padding: "2px 6px", borderRadius: 3, border: "1px solid var(--paper-line)" }}>Ctrl Shift P</kbd>)
-            를 눌러 <strong>Open User Settings (JSON)</strong>을 검색해 클릭합니다.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ② 열린 JSON 파일에 아래 내용을 추가합니다. <strong>API 키 한 곳</strong>만 수정하면 됩니다.
-          </p>
-          <CodeBlock label="settings.json">{`{
-  "mcp": {
-    "servers": {
-      "memory-store": {
-        "type": "http",
-        "url": "${serviceUrl}/api/mcp",
-        "headers": {
-          "Authorization": "Bearer 여기에_API_키_입력"
-        }
-      }
-    }
-  }
-}`}</CodeBlock>
-        </Step>
-
-        <Step n={3} title="Copilot Chat Agent 모드에서 확인">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ① VS Code 좌측에서 <strong>Copilot Chat</strong> 아이콘을 클릭합니다.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ② 채팅 입력창 위쪽 모드를 <strong>Agent</strong>로 전환합니다.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ③ 입력창 옆 <strong>도구(🔧) 버튼</strong>을 클릭해 memory-store가 목록에 있는지 확인합니다.
-          </p>
-          <Note>⚠ <strong>Ask 또는 Edit 모드에서는 MCP 도구가 보이지 않습니다.</strong> 반드시 <strong>Agent 모드</strong>로 전환해야 합니다.</Note>
-        </Step>
-      </div>
-    </>
-  );
-}
-
-// ── Cursor ────────────────────────────────────────────────────────────────────
-
-function GuideCursor({ serviceUrl }: { serviceUrl: string }) {
-  return (
-    <>
-      <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 6px" }}>Cursor 연결 가이드</h2>
-      <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 20px", lineHeight: 1.7 }}>
-        AI 코드 에디터 Cursor에 Memory Store를 연결해, 코딩 중에도 개인 기억에 접근할 수 있습니다.
-      </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <Step n={1} title="API 키 발급">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0, lineHeight: 1.7 }}>
-            위의 <strong>API 키</strong> 탭에서 새 키를 발급하고 복사해 두세요.
-          </p>
-        </Step>
-
-        <Step n={2} title="Cursor MCP 설정 파일 수정">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            아래 경로의 파일을 텍스트 편집기로 엽니다. 파일이 없으면 새로 만드세요.
-          </p>
-          <CodeBlock label="설정 파일 위치 — Mac / Linux">{`~/.cursor/mcp.json`}</CodeBlock>
-          <CodeBlock label="설정 파일 위치 — Windows">{`C:\\Users\\사용자이름\\.cursor\\mcp.json`}</CodeBlock>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "8px 0 6px", lineHeight: 1.7 }}>
-            파일 내용 전체를 아래 내용으로 바꿉니다. <strong>API 키 한 곳</strong>만 수정하면 됩니다.
-          </p>
-          <CodeBlock label="~/.cursor/mcp.json">{`{
-  "mcpServers": {
-    "memory-store": {
-      "url": "${serviceUrl}/api/mcp",
-      "headers": {
-        "Authorization": "Bearer 여기에_API_키_입력"
-      }
-    }
-  }
-}`}</CodeBlock>
-        </Step>
-
-        <Step n={3} title="Cursor 재시작 후 연결 확인">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            Cursor를 완전히 종료하고 다시 실행합니다.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            상단 메뉴 <strong>Cursor → Settings → MCP</strong>에서
-            memory-store 상태가 <strong style={{ color: "var(--success)" }}>● active</strong>인지 확인합니다.
-          </p>
-          <Tip>💡 Cursor의 Composer(채팅) 창에서 <em>&ldquo;내 취향 불러와줘&rdquo;</em>라고 입력해 테스트해보세요.</Tip>
-        </Step>
-      </div>
-    </>
-  );
-}
-
-// ── ChatGPT ───────────────────────────────────────────────────────────────────
-
-function GuideChatGPT({ serviceUrl }: { serviceUrl: string }) {
-  return (
-    <>
-      <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 6px" }}>ChatGPT 연결 가이드</h2>
-      <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 10px", lineHeight: 1.7 }}>
-        ChatGPT는 MCP를 직접 지원하지 않습니다. 대신 <strong>Custom GPT Actions</strong>를 통해 REST API로 연결합니다.
-      </p>
-      <Note>⚠ ChatGPT <strong>Plus, Team, 또는 Enterprise</strong> 구독이 필요합니다. 무료 계정에서는 Custom GPT를 만들 수 없습니다.</Note>
-      <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 20 }}>
-        <Step n={1} title="API 키 준비">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0, lineHeight: 1.7 }}>
-            <strong>API 키</strong> 탭에서 새 키를 발급합니다. ChatGPT 전용으로 별도로 발급하는 것을 권장합니다.
-          </p>
-        </Step>
-
-        <Step n={2} title="My GPTs 페이지에서 새 GPT 만들기">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ① 아래 주소에 접속합니다.
-          </p>
-          <div style={{ background: "var(--paper-2)", border: "1px solid var(--paper-line)", borderRadius: 6, padding: "10px 14px", fontSize: 13, margin: "4px 0 10px" }}>
-            🌐 <a href="https://chatgpt.com/gpts/mine" target="_blank" rel="noreferrer" style={{ color: "var(--glow-deep)", fontWeight: 600 }}>chatgpt.com/gpts/mine</a>
-          </div>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 4px", lineHeight: 1.7 }}>
-            ② 오른쪽 상단의 <strong>+ Create</strong> 버튼을 클릭합니다.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 4px", lineHeight: 1.7 }}>
-            ③ <strong>Configure</strong> 탭을 클릭합니다.
-          </p>
-        </Step>
-
-        <Step n={3} title="Actions 설정 — OpenAPI 스펙 입력">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ① Configure 탭 아래쪽 <strong>Actions</strong> 섹션에서 <strong>Create new action</strong>을 클릭합니다.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 4px", lineHeight: 1.7 }}>
-            ② <strong>Schema</strong> 입력란에 아래 내용을 붙여넣습니다. (이미 서비스 주소가 입력되어 있습니다)
-          </p>
-          <CodeBlock label="OpenAPI Schema (YAML)">{`openapi: "3.1.0"
-info:
-  title: Memory Store API
-  version: "1.0"
-servers:
-  - url: ${serviceUrl}
-paths:
-  /api/memories:
-    get:
-      operationId: getMemories
-      summary: 저장된 기억 전체 조회
-      parameters:
-        - in: query
-          name: category
-          schema: { type: string }
-      responses:
-        "200":
-          description: OK
-    post:
-      operationId: saveMemory
-      summary: 기억 저장
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [category, key, value]
-              properties:
-                category:
-                  type: string
-                  enum: [취향,건강,인간관계,재무,목표,습관,기타]
-                key:   { type: string }
-                value: { type: string }
-      responses:
-        "200":
-          description: OK
-  /api/search:
-    get:
-      operationId: searchMemories
-      summary: 기억 검색
-      parameters:
-        - in: query
-          name: q
-          required: true
-          schema: { type: string }
-      responses:
-        "200":
-          description: OK`}</CodeBlock>
-        </Step>
-
-        <Step n={4} title="인증(Authentication) 설정">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ① Action 편집 화면에서 <strong>Authentication</strong> 항목을 클릭합니다.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 4px", lineHeight: 1.7 }}>
-            ② 아래와 같이 설정합니다.
-          </p>
-          <div style={{ padding: "12px 16px", background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 8, fontSize: 13, color: "var(--ink-3)", lineHeight: 2, margin: "6px 0" }}>
-            <div>• Authentication type: <strong>API Key</strong></div>
-            <div>• Auth Type: <strong>Bearer</strong></div>
-            <div>• API Key: <strong>발급받은 API 키 입력</strong></div>
-          </div>
-          <Note>⚠ API 키가 ChatGPT 서버에 저장됩니다. 반드시 이 GPT 전용으로 별도 발급한 키를 사용하세요.</Note>
-        </Step>
-
-        <Step n={5} title="GPT Instructions 설정">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            Configure 탭의 <strong>Instructions</strong> 입력란에 아래 내용을 추가합니다.
-            이 지침이 GPT에게 Memory Store를 언제, 어떻게 사용할지 알려줍니다.
-          </p>
-          <CodeBlock>{`대화 시작 시 getMemories 액션을 호출해 사용자의 기억을 불러오세요.
-대화 중 사용자에 대해 새로운 사실을 알게 되면 saveMemory 액션으로 저장하세요.
-사용자가 특정 주제를 언급하면 searchMemories로 관련 기억을 먼저 조회하세요.`}</CodeBlock>
-        </Step>
-
-        <Step n={6} title="저장 및 테스트">
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 8px", lineHeight: 1.7 }}>
-            ① 오른쪽 상단 <strong>Save</strong> 버튼을 클릭해 GPT를 저장합니다.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 4px", lineHeight: 1.7 }}>
-            ② 저장된 GPT를 열어 대화창에서 테스트합니다.
-          </p>
-          <CodeBlock>{`내 Memory Store에 저장된 기억을 불러와줘`}</CodeBlock>
-          <Tip>💡 GPT가 Memory Store에서 데이터를 가져오면 연결 성공입니다.</Tip>
-        </Step>
-      </div>
-    </>
-  );
-}
-
-// ── REST API ──────────────────────────────────────────────────────────────────
-
-function GuideRestApi({ serviceUrl }: { serviceUrl: string }) {
-  return (
-    <>
-      <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--ink-1)", margin: "0 0 6px" }}>REST API 직접 연결</h2>
-      <p style={{ fontSize: 13, color: "var(--ink-3)", margin: "0 0 10px", lineHeight: 1.7 }}>
-        개발자용 직접 연동 가이드입니다. 모든 요청에{" "}
-        <Inline>Authorization: Bearer YOUR_API_KEY</Inline> 헤더를 포함합니다.
-      </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        <Step n={1} title="기억 전체 조회">
-          <CodeBlock label={`GET ${serviceUrl}/api/memories`}>{`curl ${serviceUrl}/api/memories \\
-  -H "Authorization: Bearer YOUR_API_KEY"`}</CodeBlock>
-          <p style={{ fontSize: 12, color: "var(--ink-4)", marginTop: 8 }}>
-            카테고리 필터: <Inline>/api/memories?category=취향</Inline>
-          </p>
-        </Step>
-        <Step n={2} title="기억 저장 (upsert)">
-          <CodeBlock label={`POST ${serviceUrl}/api/memories`}>{`curl -X POST ${serviceUrl}/api/memories \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "category": "취향",
-    "key": "음식",
-    "value": "라멘을 특히 좋아함"
-  }'`}</CodeBlock>
-          <Note>category와 key가 같은 기억이 이미 있으면 value만 업데이트됩니다 (upsert).</Note>
-        </Step>
-        <Step n={3} title="기억 검색">
-          <CodeBlock label={`GET ${serviceUrl}/api/search`}>{`curl "${serviceUrl}/api/search?q=음식" \\
-  -H "Authorization: Bearer YOUR_API_KEY"`}</CodeBlock>
-        </Step>
-        <Step n={4} title="기억 삭제">
-          <CodeBlock label={`DELETE ${serviceUrl}/api/memories/{id}`}>{`curl -X DELETE ${serviceUrl}/api/memories/MEMORY_ID \\
-  -H "Authorization: Bearer YOUR_API_KEY"`}</CodeBlock>
-        </Step>
-        <div style={{ background: "var(--paper-1)", border: "1px solid var(--paper-line)", borderRadius: 8, padding: "16px 18px" }}>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-4)", margin: "0 0 10px", letterSpacing: "0.05em" }}>응답 형식</p>
-          <CodeBlock>{`// GET /api/memories
-{ "memories": [{ "id", "category", "key", "value", "updatedAt" }] }
-
-// POST /api/memories
-{ "memory": { "id", "category", "key", "value" } }
-
-// DELETE /api/memories/{id}
-{ "success": true }`}</CodeBlock>
-        </div>
-      </div>
-    </>
   );
 }
