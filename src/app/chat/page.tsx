@@ -35,7 +35,7 @@ const MODELS = [
 
 function TrashIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="3 6 5 6 21 6" />
       <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
       <path d="M10 11v6M14 11v6" />
@@ -62,6 +62,16 @@ function SendIcon() {
   );
 }
 
+function MenuIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
 export default function ChatPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -73,6 +83,7 @@ export default function ChatPage() {
   const [noApiKey, setNoApiKey] = useState(false);
   const [groqUsage, setGroqUsage] = useState<{ used: number; limit: number } | null>(null);
   const [registeredProviders, setRegisteredProviders] = useState<string[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -107,6 +118,7 @@ export default function ChatPage() {
 
   async function loadConversation(id: string) {
     setActiveId(id);
+    setDrawerOpen(false);
     const res = await fetch(`/api/conversations/${id}`);
     if (res.ok) {
       const data = await res.json();
@@ -130,6 +142,7 @@ export default function ChatPage() {
       setConversations((prev) => [data, ...prev]);
       setActiveId(data.id);
       setMessages([]);
+      setDrawerOpen(false);
     }
   }
 
@@ -257,24 +270,37 @@ export default function ChatPage() {
     setInput(e.target.value);
     const el = e.target;
     el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 200) + "px";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
   }
 
+  const activeTitle = activeId
+    ? conversations.find((c) => c.id === activeId)?.title || "대화"
+    : "새 대화를 시작하세요";
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--paper-1)", overflow: "hidden", width: "100%" }}>
+    <div className="chat-root" style={{ display: "flex", minHeight: "100vh", background: "var(--paper-1)", overflow: "hidden", width: "100%" }}>
       <Sidebar />
 
+      {/* Mobile drawer overlay */}
+      <div
+        className={`chat-overlay${drawerOpen ? " open" : ""}`}
+        onClick={() => setDrawerOpen(false)}
+      />
+
       {/* Conversation list */}
-      <div style={{
-        width: 240, minWidth: 240, borderRight: "1px solid var(--paper-line)", background: "var(--paper-0)",
-        display: "flex", flexDirection: "column", flexShrink: 0, minHeight: "100vh",
-      }}>
-        <div style={{ padding: "20px 16px 12px", borderBottom: "1px solid var(--paper-line)" }}>
+      <div
+        className={`chat-conv-list${drawerOpen ? " open" : ""}`}
+        style={{
+          width: 240, minWidth: 240, borderRight: "1px solid var(--paper-line)", background: "var(--paper-0)",
+          display: "flex", flexDirection: "column", flexShrink: 0, minHeight: "100vh",
+        }}
+      >
+        <div style={{ padding: "16px 12px 12px", borderBottom: "1px solid var(--paper-line)" }}>
           <button
             onClick={newConversation}
             style={{
               width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              padding: "10px 16px", background: "var(--glow)", border: "none",
+              padding: "11px 16px", background: "var(--glow)", border: "none",
               borderRadius: 8, color: "var(--paper-0)", fontSize: 13, fontWeight: 500, cursor: "pointer",
             }}
           >
@@ -282,7 +308,7 @@ export default function ChatPage() {
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "8px 8px" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
           {loadingConvs ? (
             <p style={{ fontSize: 12, color: "var(--ink-5)", padding: "12px 8px", fontStyle: "italic" }}>불러오는 중…</p>
           ) : conversations.length === 0 ? (
@@ -293,18 +319,18 @@ export default function ChatPage() {
                 key={conv.id}
                 onClick={() => loadConversation(conv.id)}
                 style={{
-                  display: "flex", alignItems: "center", gap: 8, padding: "9px 10px",
+                  display: "flex", alignItems: "center", gap: 8, padding: "10px 10px",
                   borderRadius: 7, cursor: "pointer", marginBottom: 2,
                   background: activeId === conv.id ? "var(--paper-2)" : "transparent",
                   border: activeId === conv.id ? "1px solid var(--paper-line)" : "1px solid transparent",
                 }}
               >
-                <span style={{ flex: 1, fontSize: 12, color: "var(--ink-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <span style={{ flex: 1, fontSize: 13, color: "var(--ink-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {conv.title}
                 </span>
                 <button
                   onClick={(e) => deleteConversation(conv.id, e)}
-                  style={{ background: "none", border: "none", color: "var(--ink-5)", cursor: "pointer", padding: 2, flexShrink: 0, display: "flex", alignItems: "center" }}
+                  style={{ background: "none", border: "none", color: "var(--ink-5)", cursor: "pointer", padding: 4, flexShrink: 0, display: "flex", alignItems: "center" }}
                 >
                   <TrashIcon />
                 </button>
@@ -317,46 +343,47 @@ export default function ChatPage() {
       {/* Main chat area */}
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         {/* Top bar */}
-        <div style={{
-          padding: "14px 24px", borderBottom: "1px solid var(--paper-line)",
-          background: "var(--paper-0)", display: "flex", alignItems: "center",
+        <div className="chat-topbar" style={{
+          padding: "14px 20px", borderBottom: "1px solid var(--paper-line)",
+          background: "var(--paper-0)", display: "flex", alignItems: "center", gap: 10,
         }}>
-          <span style={{ fontSize: 13, color: "var(--ink-3)" }}>
-            {activeId
-              ? conversations.find((c) => c.id === activeId)?.title || "대화"
-              : "새 대화를 시작하세요"}
+          <button className="chat-menu-btn" onClick={() => setDrawerOpen(true)} aria-label="대화 목록 열기">
+            <MenuIcon />
+          </button>
+          <span className="chat-topbar-title" style={{ fontSize: 13, color: "var(--ink-3)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {activeTitle}
           </span>
         </div>
 
         {/* Messages */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "24px 24px 8px" }}>
+        <div className="chat-messages-area" style={{ flex: 1, overflowY: "auto", padding: "20px 20px 8px" }}>
           {!activeId ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 16, paddingTop: 80 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 16, paddingTop: 60 }}>
               <div style={{ fontSize: 40 }}>💬</div>
-              <p style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--ink-2)", margin: 0 }}>
+              <p style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--ink-2)", margin: 0, textAlign: "center" }}>
                 새 대화를 시작하세요
               </p>
-              <p style={{ fontSize: 13, color: "var(--ink-4)", margin: 0, textAlign: "center", maxWidth: 360, lineHeight: 1.7 }}>
+              <p style={{ fontSize: 13, color: "var(--ink-4)", margin: 0, textAlign: "center", maxWidth: 320, lineHeight: 1.7 }}>
                 AI가 당신에 대해 기억한 내용을 바탕으로 더욱 개인화된 대화를 나눌 수 있습니다.
               </p>
               {noApiKey && (
-                <div style={{ padding: "12px 20px", background: "rgba(177,75,62,0.08)", border: "1px solid rgba(177,75,62,0.25)", borderRadius: 8, fontSize: 13, color: "var(--danger)", textAlign: "center" }}>
+                <div style={{ padding: "12px 16px", background: "rgba(177,75,62,0.08)", border: "1px solid rgba(177,75,62,0.25)", borderRadius: 8, fontSize: 13, color: "var(--danger)", textAlign: "center" }}>
                   API 키가 없습니다. <Link href="/settings" style={{ color: "var(--glow-deep)", fontWeight: 600 }}>설정 &rarr; AI 설정</Link>에서 키를 등록해주세요.
                 </div>
               )}
               <button onClick={newConversation} style={{
-                padding: "10px 24px", background: "var(--glow)", border: "none",
-                borderRadius: 8, color: "var(--paper-0)", fontSize: 13, fontWeight: 500, cursor: "pointer",
+                padding: "12px 28px", background: "var(--glow)", border: "none",
+                borderRadius: 10, color: "var(--paper-0)", fontSize: 14, fontWeight: 500, cursor: "pointer",
               }}>
                 + 새 대화 시작
               </button>
             </div>
           ) : messages.length === 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 80, gap: 10 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 60, gap: 10 }}>
               <p style={{ fontSize: 13, color: "var(--ink-4)", fontStyle: "italic" }}>메시지를 입력해 대화를 시작하세요.</p>
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
               {messages.map((msg, i) => (
                 <MessageBubble key={i} message={msg} />
               ))}
@@ -367,25 +394,26 @@ export default function ChatPage() {
 
         {/* No API key warning */}
         {noApiKey && activeId && (
-          <div style={{ margin: "0 24px 8px", padding: "10px 16px", background: "rgba(177,75,62,0.08)", border: "1px solid rgba(177,75,62,0.25)", borderRadius: 8, fontSize: 13, color: "var(--danger)" }}>
+          <div style={{ margin: "0 16px 8px", padding: "10px 14px", background: "rgba(177,75,62,0.08)", border: "1px solid rgba(177,75,62,0.25)", borderRadius: 8, fontSize: 13, color: "var(--danger)" }}>
             API 키가 없습니다. <Link href="/settings" style={{ color: "var(--glow-deep)", fontWeight: 600 }}>설정 &rarr; AI 설정</Link>에서 키를 등록해주세요.
           </div>
         )}
 
         {/* Input area */}
         {activeId && (
-          <div style={{
-            padding: "12px 24px 24px",
+          <div className="chat-input-area" style={{
+            padding: "10px 20px 20px",
             background: "var(--paper-0)", borderTop: "1px solid var(--paper-line)",
           }}>
-            {/* Model selector */}
-            <div style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            {/* Model selector + usage */}
+            <div style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <select
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 style={{
-                  padding: "5px 10px", background: "var(--paper-1)", border: "1px solid var(--paper-line)",
+                  padding: "6px 10px", background: "var(--paper-1)", border: "1px solid var(--paper-line)",
                   borderRadius: 6, fontSize: 12, color: "var(--ink-3)", cursor: "pointer", outline: "none",
+                  maxWidth: "100%",
                 }}
               >
                 {availableModels.map((m) => (
@@ -396,36 +424,38 @@ export default function ChatPage() {
                 <span style={{
                   fontSize: 11, color: groqUsage.used >= groqUsage.limit ? "var(--danger)" : "var(--ink-4)",
                   padding: "3px 8px", background: "var(--paper-2)", borderRadius: 5, border: "1px solid var(--paper-line)",
+                  whiteSpace: "nowrap",
                 }}>
                   오늘 {groqUsage.used} / {groqUsage.limit}회 사용
                 </span>
               )}
             </div>
 
-            <div style={{
+            <div className="chat-input-row" style={{
               display: "flex", gap: 10, alignItems: "flex-end",
               background: "var(--paper-1)", border: "1px solid var(--paper-line)",
-              borderRadius: 12, padding: "10px 12px",
+              borderRadius: 14, padding: "10px 12px",
             }}>
               <textarea
                 ref={textareaRef}
                 value={input}
                 onChange={autoResize}
                 onKeyDown={handleKeyDown}
-                placeholder="메시지 입력… (Shift+Enter: 줄바꿈)"
+                placeholder="메시지 입력…"
                 rows={1}
                 disabled={sending}
                 style={{
                   flex: 1, resize: "none", border: "none", background: "transparent",
-                  fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--ink-1)",
-                  outline: "none", lineHeight: 1.6, minHeight: 24, maxHeight: 200,
+                  fontFamily: "var(--font-sans)", fontSize: 15, color: "var(--ink-1)",
+                  outline: "none", lineHeight: 1.6, minHeight: 26, maxHeight: 160,
                 }}
               />
               <button
+                className="chat-send-btn"
                 onClick={sendMessage}
                 disabled={!input.trim() || sending}
                 style={{
-                  width: 36, height: 36, borderRadius: 8, border: "none",
+                  width: 38, height: 38, borderRadius: 9, border: "none",
                   background: input.trim() && !sending ? "var(--glow)" : "var(--paper-3)",
                   color: "var(--paper-0)", cursor: input.trim() && !sending ? "pointer" : "default",
                   display: "flex", alignItems: "center", justifyContent: "center",
@@ -435,7 +465,7 @@ export default function ChatPage() {
                 <SendIcon />
               </button>
             </div>
-            <p style={{ fontSize: 11, color: "var(--ink-5)", margin: "6px 0 0", textAlign: "center" }}>
+            <p style={{ fontSize: 11, color: "var(--ink-5)", margin: "5px 0 0", textAlign: "center" }}>
               AI 응답 중에 중요한 정보는 자동으로 기억에 저장됩니다.
             </p>
           </div>
@@ -459,16 +489,19 @@ function MessageBubble({ message }: { message: Message }) {
       display: "flex", flexDirection: "column",
       alignItems: isUser ? "flex-end" : "flex-start",
     }}>
-      <div style={{
-        maxWidth: "75%", minWidth: 0, padding: "12px 16px",
-        background: isUser ? "var(--glow)" : "var(--paper-0)",
-        color: isUser ? "var(--paper-0)" : "var(--ink-1)",
-        borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-        border: isUser ? "none" : "1px solid var(--paper-line)",
-        fontSize: 14, lineHeight: 1.7,
-        boxShadow: "var(--shadow-1)",
-        wordBreak: "break-word", overflowWrap: "break-word",
-      }}>
+      <div
+        className="chat-bubble"
+        style={{
+          maxWidth: "76%", minWidth: 0, padding: "11px 15px",
+          background: isUser ? "var(--glow)" : "var(--paper-0)",
+          color: isUser ? "var(--paper-0)" : "var(--ink-1)",
+          borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+          border: isUser ? "none" : "1px solid var(--paper-line)",
+          fontSize: 14, lineHeight: 1.75,
+          boxShadow: "var(--shadow-1)",
+          wordBreak: "break-word", overflowWrap: "break-word",
+        }}
+      >
         {message.content ? (
           <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{message.content}</span>
         ) : message.streaming ? (
@@ -482,7 +515,7 @@ function MessageBubble({ message }: { message: Message }) {
       {message.createdAt && (
         <span style={{
           fontSize: 11, color: "var(--ink-5)",
-          marginTop: 4,
+          marginTop: 3,
           paddingLeft: isUser ? 0 : 4,
           paddingRight: isUser ? 4 : 0,
         }}>
