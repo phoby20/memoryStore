@@ -32,9 +32,9 @@ describe("Sidebar", () => {
     expect(screen.getByText("기억 지도")).toBeInTheDocument();
   });
 
-  it("설정 & API 키 메뉴가 있다", () => {
+  it("설정 메뉴가 있다", () => {
     render(<Sidebar />);
-    expect(screen.getByText("설정 & API 키")).toBeInTheDocument();
+    expect(screen.getByText("설정")).toBeInTheDocument();
   });
 
   it("UserButton을 렌더링한다", () => {
