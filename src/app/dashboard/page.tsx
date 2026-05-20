@@ -127,26 +127,78 @@ export default function DashboardPage() {
 
   const selectedMemory = memories.find((m) => m.id === selectedId) ?? null;
 
-  // Neural graph node positions — scale to container size and node count
-  const nodes = useMemo(() => {
-    const n = memories.length;
+  // Spider-web / neural-network graph layout
+  const graphNodes = useMemo(() => {
     const cx = graphSize.w / 2;
     const cy = graphSize.h / 2;
     const minDim = Math.min(graphSize.w, graphSize.h);
-    // Spread nodes more when few, tighter when many
-    const spread = n <= 3 ? 0.40 : n <= 7 ? 0.34 : 0.28;
-    const ring1 = minDim * spread;
-    const ring2 = minDim * (spread + 0.09);
-    return memories.slice(0, 18).map((m, i) => {
-      const angle = (i / Math.max(n, 1)) * Math.PI * 2 - Math.PI / 2;
-      const ring = i % 2 === 0 ? ring1 : ring2;
+    const catR = minDim * 0.30;
+
+    // Category hub nodes — vertices of a heptagon
+    const catNodes = CATEGORIES.map((cat, i) => {
+      const angle = (i / CATEGORIES.length) * Math.PI * 2 - Math.PI / 2;
       return {
-        ...m,
-        x: cx + Math.cos(angle) * ring,
-        y: cy + Math.sin(angle) * ring * 0.74,
+        type: "cat" as const,
+        id: `cat_${cat}`,
+        cat,
+        x: cx + Math.cos(angle) * catR,
+        y: cy + Math.sin(angle) * catR * 0.84,
+        color: getCatColor(cat),
+        count: memories.filter((m) => m.category === cat).length,
       };
     });
+
+    // Memory leaf nodes — arc-spread around their category hub
+    const memNodes = memories.slice(0, 30).map((m) => {
+      const catNode = catNodes.find((c) => c.cat === m.category) ?? catNodes[catNodes.length - 1];
+      const sameCat = memories.filter((x) => x.category === m.category).slice(0, 30);
+      const idx = sameCat.findIndex((x) => x.id === m.id);
+      const count = sameCat.length;
+      const awayAngle = Math.atan2(catNode.y - cy, catNode.x - cx);
+      const spread = count <= 1 ? 0 : Math.min(Math.PI * 0.8, (count - 1) * 0.38);
+      const angle = count <= 1 ? awayAngle : awayAngle - spread / 2 + (idx / (count - 1)) * spread;
+      const memR = 52 + Math.min(count - 1, 4) * 5;
+      return {
+        type: "mem" as const,
+        ...m,
+        x: catNode.x + Math.cos(angle) * memR,
+        y: catNode.y + Math.sin(angle) * memR,
+        catNode,
+      };
+    });
+
+    return { catNodes, memNodes, cx, cy };
   }, [memories, graphSize]);
+
+  // Web edges: spokes (center→cat) + outer ring + inner star + memory→cat
+  const graphEdges = useMemo(() => {
+    const { catNodes, memNodes, cx, cy } = graphNodes;
+    const edges: Array<{ x1: number; y1: number; x2: number; y2: number; kind: string; color?: string; memId?: string }> = [];
+
+    // Spokes: center → category
+    catNodes.forEach((c) => {
+      edges.push({ x1: cx, y1: cy, x2: c.x, y2: c.y, kind: "spoke" });
+    });
+
+    // Outer ring: adjacent categories
+    catNodes.forEach((c, i) => {
+      const next = catNodes[(i + 1) % catNodes.length];
+      edges.push({ x1: c.x, y1: c.y, x2: next.x, y2: next.y, kind: "ring" });
+    });
+
+    // Inner star: skip-3 connections → {7/3} heptagram
+    catNodes.forEach((c, i) => {
+      const j = (i + Math.floor(catNodes.length / 2)) % catNodes.length;
+      edges.push({ x1: c.x, y1: c.y, x2: catNodes[j].x, y2: catNodes[j].y, kind: "inner" });
+    });
+
+    // Memory → category
+    memNodes.forEach((m) => {
+      edges.push({ x1: m.catNode.x, y1: m.catNode.y, x2: m.x, y2: m.y, kind: "mem", color: m.catNode.color, memId: m.id });
+    });
+
+    return edges;
+  }, [graphNodes]);
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--paper-1)" }}>
@@ -313,61 +365,115 @@ export default function DashboardPage() {
                 ) : (
                   <svg viewBox={`0 0 ${graphSize.w} ${graphSize.h}`} style={{ width: "100%", height: "100%", display: "block" }}>
                     <defs>
-                      <pattern id="dot-grid" width="24" height="24" patternUnits="userSpaceOnUse">
-                        <circle cx="12" cy="12" r="0.6" fill="var(--paper-line)" opacity="0.6" />
+                      <pattern id="dot-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+                        <circle cx="14" cy="14" r="0.5" fill="var(--paper-line)" opacity="0.5" />
                       </pattern>
+                      <radialGradient id="center-glow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="var(--glow)" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="var(--glow)" stopOpacity="0" />
+                      </radialGradient>
                     </defs>
                     <rect width={graphSize.w} height={graphSize.h} fill="url(#dot-grid)" />
 
-                    {/* center to each node */}
-                    {nodes.map((n) => {
-                      const cx = graphSize.w / 2, cy = graphSize.h / 2;
-                      const mx = (cx + n.x) / 2 + Math.sin(n.x * 0.3) * 4;
-                      const my = (cy + n.y) / 2 + Math.cos(n.y * 0.3) * 4;
+                    {/* Center ambient glow */}
+                    <circle cx={graphNodes.cx} cy={graphNodes.cy} r={graphSize.w * 0.22} fill="url(#center-glow)" />
+
+                    {/* Web structural edges */}
+                    {graphEdges.map((e, i) => {
+                      const isMem = e.kind === "mem";
+                      const highlighted = isMem && e.memId === selectedId;
+                      const dimmed = !!selectedId && !highlighted && isMem;
                       return (
-                        <path key={"l" + n.id}
-                          d={`M ${cx} ${cy} Q ${mx} ${my} ${n.x} ${n.y}`}
-                          fill="none" stroke="var(--ink-3)" strokeWidth="0.8"
-                          opacity={selectedId === n.id ? 0.85 : 0.3} strokeLinecap="round"
+                        <line key={i}
+                          x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2}
+                          stroke={
+                            e.kind === "spoke" ? "var(--glow)"
+                            : e.kind === "ring" ? "var(--ink-4)"
+                            : e.kind === "inner" ? "var(--ink-5)"
+                            : (e.color ?? "var(--paper-line)")
+                          }
+                          strokeWidth={
+                            e.kind === "spoke" ? 1.0
+                            : e.kind === "ring" ? 1.4
+                            : e.kind === "inner" ? 0.7
+                            : highlighted ? 1.6 : 0.9
+                          }
+                          opacity={
+                            e.kind === "spoke" ? 0.28
+                            : e.kind === "ring" ? 0.45
+                            : e.kind === "inner" ? 0.18
+                            : highlighted ? 0.9 : dimmed ? 0.1 : 0.45
+                          }
+                          strokeLinecap="round"
                         />
                       );
                     })}
 
-                    {/* satellite nodes */}
-                    {nodes.map((n) => {
-                      const color = getCatColor(n.category);
+                    {/* Memory leaf nodes */}
+                    {graphNodes.memNodes.map((n) => {
                       const sel = selectedId === n.id;
+                      const faded = !!selectedId && !sel;
                       return (
                         <g key={n.id} onClick={() => setSelectedId(sel ? null : n.id)} style={{ cursor: "pointer" }}>
-                          {sel && <circle cx={n.x} cy={n.y} r={14} fill="none" stroke={color} strokeWidth="1.2" strokeDasharray="2 3" opacity="0.7" />}
-                          <circle cx={n.x} cy={n.y} r={sel ? 10 : 7} fill={color} opacity="0.15" />
-                          <circle cx={n.x} cy={n.y} r={sel ? 7 : 5} fill={color} stroke="var(--ink-2)" strokeWidth="0.6" />
-                          <text x={n.x} y={n.y + (sel ? 10 : 7) + 13} textAnchor="middle" fontSize="10" fill="var(--ink-3)" fontFamily="var(--font-sans)">
-                            {n.key.length > 8 ? n.key.slice(0, 7) + "…" : n.key}
+                          {sel && (
+                            <circle cx={n.x} cy={n.y} r={15} fill="none"
+                              stroke={n.catNode.color} strokeWidth="1"
+                              strokeDasharray="3 4" opacity="0.7">
+                              <animateTransform attributeName="transform" type="rotate"
+                                from={`0 ${n.x} ${n.y}`} to={`360 ${n.x} ${n.y}`}
+                                dur="8s" repeatCount="indefinite" />
+                            </circle>
+                          )}
+                          <circle cx={n.x} cy={n.y} r={sel ? 9 : 6}
+                            fill={n.catNode.color} stroke="var(--paper-0)" strokeWidth="1.4"
+                            opacity={faded ? 0.25 : 0.9} />
+                          <text x={n.x} y={n.y + (sel ? 9 : 6) + 12}
+                            textAnchor="middle" fontSize="9.5" fill="var(--ink-3)"
+                            fontFamily="var(--font-sans)" opacity={faded ? 0.3 : 1}>
+                            {n.key.length > 7 ? n.key.slice(0, 6) + "…" : n.key}
                           </text>
                         </g>
                       );
                     })}
 
-                    {/* center self node */}
-                    <circle cx={graphSize.w / 2} cy={graphSize.h / 2} r="32" fill="var(--glow)" opacity="0.08" />
-                    <circle cx={graphSize.w / 2} cy={graphSize.h / 2} r="20" fill="var(--glow)" opacity="0.18" />
-                    <circle cx={graphSize.w / 2} cy={graphSize.h / 2} r="12" fill="var(--glow)" stroke="var(--ink-2)" strokeWidth="1">
-                      <animate attributeName="r" values="12;13.5;12" dur="3.5s" repeatCount="indefinite" />
-                    </circle>
-                    <text x={graphSize.w / 2} y={graphSize.h / 2 - 22} textAnchor="middle" fontSize="12" fill="var(--ink-1)" fontFamily="var(--font-serif)" fontStyle="italic" fontWeight="600">나</text>
-
-                    {/* legend */}
-                    <g transform={`translate(16, ${graphSize.h - 120})`}>
-                      <rect width="160" height="104" fill="var(--paper-1)" rx="6" stroke="var(--paper-line)" strokeWidth="0.6" />
-                      <text x="12" y="18" fontSize="9" fill="var(--ink-4)" fontFamily="var(--font-mono)">CATEGORIES</text>
-                      {Object.entries(CATEGORY_COLORS).slice(0, 5).map(([name, color], i) => (
-                        <g key={name} transform={`translate(12, ${32 + i * 14})`}>
-                          <circle cx="4" cy="0" r="3.5" fill={color} />
-                          <text x="14" y="3.5" fontSize="10" fill="var(--ink-3)">{name}</text>
+                    {/* Category hub nodes */}
+                    {graphNodes.catNodes.map((c) => {
+                      const awayAngle = Math.atan2(c.y - graphNodes.cy, c.x - graphNodes.cx);
+                      const lx = c.x + Math.cos(awayAngle) * 28;
+                      const ly = c.y + Math.sin(awayAngle) * 28;
+                      const hasMemories = c.count > 0;
+                      return (
+                        <g key={c.id}>
+                          <circle cx={c.x} cy={c.y} r={22} fill={c.color} opacity="0.07" />
+                          <circle cx={c.x} cy={c.y} r={14} fill={c.color} opacity="0.18"
+                            stroke={c.color} strokeWidth={hasMemories ? 1.8 : 0.8} />
+                          <circle cx={c.x} cy={c.y} r={8} fill={c.color}
+                            stroke="var(--paper-0)" strokeWidth="1.5"
+                            opacity={hasMemories ? 1 : 0.4} />
+                          <text x={lx} y={ly + 4} textAnchor="middle"
+                            fontSize="11" fill="var(--ink-1)" fontFamily="var(--font-sans)" fontWeight="600">
+                            {c.cat}
+                          </text>
+                          {c.count > 0 && (
+                            <text x={lx} y={ly + 17} textAnchor="middle"
+                              fontSize="9" fill="var(--ink-4)" fontFamily="var(--font-mono)">
+                              {c.count}개
+                            </text>
+                          )}
                         </g>
-                      ))}
-                    </g>
+                      );
+                    })}
+
+                    {/* Center "나" node */}
+                    <circle cx={graphNodes.cx} cy={graphNodes.cy} r={30} fill="var(--glow)" opacity="0.07" />
+                    <circle cx={graphNodes.cx} cy={graphNodes.cy} r={18} fill="var(--glow)" opacity="0.15" />
+                    <circle cx={graphNodes.cx} cy={graphNodes.cy} r={11} fill="var(--glow)"
+                      stroke="var(--paper-0)" strokeWidth="1.8">
+                      <animate attributeName="r" values="11;13;11" dur="4s" repeatCount="indefinite" />
+                    </circle>
+                    <text x={graphNodes.cx} y={graphNodes.cy + 5} textAnchor="middle"
+                      fontSize="11" fill="var(--paper-0)" fontFamily="var(--font-serif)"
+                      fontStyle="italic" fontWeight="700">나</text>
                   </svg>
                 )}
               </div>
