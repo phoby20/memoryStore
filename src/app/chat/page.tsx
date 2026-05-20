@@ -62,12 +62,11 @@ function SendIcon() {
   );
 }
 
-function MenuIcon() {
+function BackIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <line x1="3" y1="12" x2="21" y2="12" />
-      <line x1="3" y1="18" x2="21" y2="18" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
     </svg>
   );
 }
@@ -83,7 +82,6 @@ export default function ChatPage() {
   const [noApiKey, setNoApiKey] = useState(false);
   const [groqUsage, setGroqUsage] = useState<{ used: number; limit: number } | null>(null);
   const [registeredProviders, setRegisteredProviders] = useState<string[]>([]);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -118,7 +116,6 @@ export default function ChatPage() {
 
   async function loadConversation(id: string) {
     setActiveId(id);
-    setDrawerOpen(false);
     const res = await fetch(`/api/conversations/${id}`);
     if (res.ok) {
       const data = await res.json();
@@ -142,7 +139,6 @@ export default function ChatPage() {
       setConversations((prev) => [data, ...prev]);
       setActiveId(data.id);
       setMessages([]);
-      setDrawerOpen(false);
     }
   }
 
@@ -278,29 +274,27 @@ export default function ChatPage() {
     : "새 대화를 시작하세요";
 
   return (
-    <div className="chat-root" style={{ display: "flex", minHeight: "100vh", background: "var(--paper-1)", overflow: "hidden", width: "100%" }}>
+    <div
+      className="chat-root"
+      data-active={activeId ? "true" : "false"}
+      style={{ display: "flex", minHeight: "100vh", background: "var(--paper-1)", overflow: "hidden", width: "100%" }}
+    >
       <Sidebar />
 
-      {/* Mobile drawer overlay */}
+      {/* Conversation list panel */}
       <div
-        className={`chat-overlay${drawerOpen ? " open" : ""}`}
-        onClick={() => setDrawerOpen(false)}
-      />
-
-      {/* Conversation list */}
-      <div
-        className={`chat-conv-list${drawerOpen ? " open" : ""}`}
+        className="chat-conv-list"
         style={{
           width: 240, minWidth: 240, borderRight: "1px solid var(--paper-line)", background: "var(--paper-0)",
           display: "flex", flexDirection: "column", flexShrink: 0, minHeight: "100vh",
         }}
       >
-        <div style={{ padding: "16px 12px 12px", borderBottom: "1px solid var(--paper-line)" }}>
+        <div className="chat-conv-header" style={{ padding: "16px 12px 12px", borderBottom: "1px solid var(--paper-line)" }}>
           <button
             onClick={newConversation}
             style={{
               width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              padding: "11px 16px", background: "var(--glow)", border: "none",
+              padding: "12px 16px", background: "var(--glow)", border: "none",
               borderRadius: 8, color: "var(--paper-0)", fontSize: 13, fontWeight: 500, cursor: "pointer",
             }}
           >
@@ -341,14 +335,27 @@ export default function ChatPage() {
       </div>
 
       {/* Main chat area */}
-      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <div className="chat-main" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         {/* Top bar */}
         <div className="chat-topbar" style={{
           padding: "14px 20px", borderBottom: "1px solid var(--paper-line)",
           background: "var(--paper-0)", display: "flex", alignItems: "center", gap: 10,
         }}>
-          <button className="chat-menu-btn" onClick={() => setDrawerOpen(true)} aria-label="대화 목록 열기">
-            <MenuIcon />
+          {/* Back button — mobile only */}
+          <button
+            className="chat-back-btn"
+            onClick={() => setActiveId(null)}
+            aria-label="대화 목록으로"
+            style={{
+              display: "none",
+              alignItems: "center", justifyContent: "center",
+              width: 36, height: 36, padding: 0,
+              background: "none", border: "none",
+              color: "var(--ink-3)", cursor: "pointer",
+              borderRadius: 8, flexShrink: 0,
+            }}
+          >
+            <BackIcon />
           </button>
           <span className="chat-topbar-title" style={{ fontSize: 13, color: "var(--ink-3)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {activeTitle}
@@ -405,7 +412,6 @@ export default function ChatPage() {
             padding: "10px 20px 20px",
             background: "var(--paper-0)", borderTop: "1px solid var(--paper-line)",
           }}>
-            {/* Model selector + usage */}
             <div style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <select
                 value={model}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
@@ -11,6 +12,16 @@ const items = [
   { id: "dashboard", label: "기억 지도", icon: "◉", href: "/dashboard" },
   { id: "settings", label: "설정", icon: "⚙", href: "/settings" },
 ];
+
+function HamburgerIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
 
 function SunIcon() {
   return (
@@ -37,103 +48,123 @@ function MoonIcon() {
 }
 
 export default function Sidebar() {
+  const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const active = items.find((i) => pathname.startsWith(i.href))?.id ?? "";
   const { theme, toggle } = useTheme();
 
+  const close = () => setOpen(false);
+
   return (
-    <nav className="sidebar" style={{
-      width: 256,
-      padding: "28px 18px",
-      borderRight: "1px solid var(--paper-line)",
-      background: "var(--paper-0)",
-      display: "flex",
-      flexDirection: "column",
-      gap: 4,
-      minHeight: "100vh",
-      position: "sticky",
-      top: 0,
-      flexShrink: 0,
-    }}>
-      <div className="sidebar-logo-area" style={{ padding: "0 8px 24px" }}>
-        <Link href="/dashboard" style={{ textDecoration: "none" }}>
-          <Logo />
-        </Link>
-      </div>
+    <>
+      {/* Mobile-only hamburger trigger */}
+      <button
+        className="sidebar-hamburger"
+        onClick={() => setOpen(true)}
+        aria-label="메뉴 열기"
+      >
+        <HamburgerIcon />
+      </button>
 
-      <div className="sidebar-workspace-label" style={{ fontSize: 10, color: "var(--ink-4)", padding: "12px 12px 6px", letterSpacing: "0.1em" }}>
-        WORKSPACE
-      </div>
+      {/* Mobile overlay */}
+      <div
+        className={`sidebar-overlay${open ? " open" : ""}`}
+        onClick={close}
+      />
 
-      <div className="sidebar-nav" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        {items.map((it) => (
-          <Link
-            key={it.id}
-            href={it.href}
-            className="sidebar-nav-item"
+      <nav className={`sidebar${open ? " open" : ""}`} style={{
+        width: 256,
+        padding: "28px 18px",
+        borderRight: "1px solid var(--paper-line)",
+        background: "var(--paper-0)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 4,
+        minHeight: "100vh",
+        position: "sticky",
+        top: 0,
+        flexShrink: 0,
+      }}>
+        <div className="sidebar-logo-area" style={{ padding: "0 8px 24px" }}>
+          <Link href="/dashboard" style={{ textDecoration: "none" }} onClick={close}>
+            <Logo />
+          </Link>
+        </div>
+
+        <div className="sidebar-workspace-label" style={{ fontSize: 10, color: "var(--ink-4)", padding: "12px 12px 6px", letterSpacing: "0.1em" }}>
+          WORKSPACE
+        </div>
+
+        <div className="sidebar-nav" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          {items.map((it) => (
+            <Link
+              key={it.id}
+              href={it.href}
+              className="sidebar-nav-item"
+              onClick={close}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                padding: "10px 12px",
+                fontSize: 13,
+                color: active === it.id ? "var(--ink-1)" : "var(--ink-3)",
+                background: active === it.id ? "var(--paper-2)" : "transparent",
+                borderRadius: 6,
+                textDecoration: "none",
+                fontWeight: active === it.id ? 600 : 400,
+                transition: "background 0.15s",
+              }}
+            >
+              <span style={{
+                width: 16,
+                textAlign: "center",
+                color: active === it.id ? "var(--glow)" : "var(--ink-4)",
+              }}>{it.icon}</span>
+              <span className="sidebar-nav-label">{it.label}</span>
+            </Link>
+          ))}
+        </div>
+
+        <div className="sidebar-bottom" style={{ marginTop: "auto", padding: "16px 8px 0", borderTop: "1px dashed var(--paper-line)" }}>
+          <button
+            onClick={toggle}
+            title={theme === "light" ? "다크 모드로 전환" : "라이트 모드로 전환"}
             style={{
+              width: "100%",
               display: "flex",
               alignItems: "center",
-              gap: 12,
-              padding: "10px 12px",
-              fontSize: 13,
-              color: active === it.id ? "var(--ink-1)" : "var(--ink-3)",
-              background: active === it.id ? "var(--paper-2)" : "transparent",
+              gap: 10,
+              padding: "8px 10px",
+              marginBottom: 8,
+              background: "transparent",
+              border: "1px solid var(--paper-line)",
               borderRadius: 6,
-              textDecoration: "none",
-              fontWeight: active === it.id ? 600 : 400,
-              transition: "background 0.15s",
+              color: "var(--ink-3)",
+              fontSize: 12,
+              cursor: "pointer",
+              transition: "background 0.15s, color 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "var(--paper-2)";
+              (e.currentTarget as HTMLButtonElement).style.color = "var(--ink-1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+              (e.currentTarget as HTMLButtonElement).style.color = "var(--ink-3)";
             }}
           >
-            <span style={{
-              width: 16,
-              textAlign: "center",
-              color: active === it.id ? "var(--glow)" : "var(--ink-4)",
-            }}>{it.icon}</span>
-            <span className="sidebar-nav-label">{it.label}</span>
-          </Link>
-        ))}
-      </div>
+            <span style={{ color: "var(--glow)", display: "flex", alignItems: "center" }}>
+              {theme === "light" ? <MoonIcon /> : <SunIcon />}
+            </span>
+            {theme === "light" ? "다크 모드" : "라이트 모드"}
+          </button>
 
-      <div className="sidebar-bottom" style={{ marginTop: "auto", padding: "16px 8px 0", borderTop: "1px dashed var(--paper-line)" }}>
-        {/* Theme toggle */}
-        <button
-          onClick={toggle}
-          title={theme === "light" ? "다크 모드로 전환" : "라이트 모드로 전환"}
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "8px 10px",
-            marginBottom: 8,
-            background: "transparent",
-            border: "1px solid var(--paper-line)",
-            borderRadius: 6,
-            color: "var(--ink-3)",
-            fontSize: 12,
-            cursor: "pointer",
-            transition: "background 0.15s, color 0.15s",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "var(--paper-2)";
-            (e.currentTarget as HTMLButtonElement).style.color = "var(--ink-1)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-            (e.currentTarget as HTMLButtonElement).style.color = "var(--ink-3)";
-          }}
-        >
-          <span style={{ color: "var(--glow)", display: "flex", alignItems: "center" }}>
-            {theme === "light" ? <MoonIcon /> : <SunIcon />}
-          </span>
-          {theme === "light" ? "다크 모드" : "라이트 모드"}
-        </button>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: 8 }}>
-          <UserButton />
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: 8 }}>
+            <UserButton />
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }
